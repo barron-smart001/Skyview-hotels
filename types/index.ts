@@ -1,13 +1,13 @@
 ﻿export interface Room {
   id: string;
   name: string;
-  type: 'Standard' | 'Deluxe' | 'Executive' | 'Suite' | 'Presidential';
+  type: string;
   pricePerNight: number;
   capacity: number;
   bedType: string;
-  sizeSqFt: number;
-  rating: number;
-  reviewCount: number;
+  sizeSqFt?: number;
+  rating?: number;
+  reviewCount?: number;
   description: string;
   images: string[];
   amenities: string[];

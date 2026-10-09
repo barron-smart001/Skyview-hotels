@@ -18,7 +18,7 @@ interface RoomHousekeeping {
 
 const INITIAL_HOUSEKEEPING: RoomHousekeeping[] = [
   { id: '101', roomNumber: 'RM 101', name: 'Skyline Presidential Suite', floor: 10, status: 'Clean & Ready', lastInspected: '10:30 AM' },
-  { id: '201', roomNumber: 'RM 201', name: 'Executive Oceanfront Suite', floor: 8, status: 'In Progress', lastInspected: '11:15 AM' },
+  { id: '201', roomNumber: 'RM 201', name: 'Executive Panorama Suite', floor: 8, status: 'In Progress', lastInspected: '11:15 AM' },
   { id: '305', roomNumber: 'RM 305', name: 'Deluxe Garden View Room', floor: 4, status: 'Needs Cleaning', lastInspected: 'Guest checkout 09:00 AM' },
   { id: '402', roomNumber: 'RM 402', name: 'Standard City Comfort', floor: 2, status: 'Clean & Ready', lastInspected: 'Yesterday' },
   { id: '508', roomNumber: 'RM 508', name: 'Signature Family Haven', floor: 5, status: 'Maintenance', lastInspected: 'HVAC Filter check' },

@@ -23,7 +23,7 @@ export const MOCK_ROOMS: Room[] = [
   },
   {
     id: "room-2",
-    name: "Executive Oceanfront Suite",
+    name: "Executive Panorama Suite",
     type: "Executive",
     pricePerNight: 165000,
     capacity: 2,
@@ -31,12 +31,12 @@ export const MOCK_ROOMS: Room[] = [
     sizeSqFt: 650,
     rating: 4.92,
     reviewCount: 98,
-    description: "Thoughtfully crafted for business and leisure travelers featuring a dedicated work lounge, marble bathtub, and ocean breezes.",
+    description: "Thoughtfully crafted for business and leisure travelers with a dedicated work lounge, marble bathtub, and expansive city views.",
     images: [
       "https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=1200&q=80",
       "https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=1200&q=80"
     ],
-    amenities: ["High-Speed Wi-Fi", "Workstation & Ergonomic Chair", "Espresso Machine", "Ocean View Balcony", "Rain Shower", "Mini Bar"],
+    amenities: ["High-Speed Wi-Fi", "Workstation & Ergonomic Chair", "Espresso Machine", "Private Balcony", "Rain Shower", "Mini Bar"],
     available: true,
     featured: true,
   },
@@ -130,11 +130,11 @@ export const MOCK_SERVICES: HotelService[] = [
   },
   {
     id: "srv-4",
-    name: "Coastal Sunset Yacht Tour",
+    name: "Ibom Heritage City Tour",
     category: "Tours & Experiences",
     price: 85000,
     duration: "3 hours",
-    description: "Private cruise along the coastline during golden hour with cocktails, live acoustic music, and canapes.",
+    description: "A thoughtfully guided Uyo experience featuring cultural landmarks, artisan stops, and a relaxed evening return.",
     image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
     popular: false,
   }

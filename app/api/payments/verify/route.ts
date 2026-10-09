@@ -34,7 +34,8 @@ export async function GET(request: Request) {
         currency: 'NGN',
       },
     });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Payment verification failed' }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Payment verification failed';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

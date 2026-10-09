@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { HOTEL } from "@/lib/hotel-config";
 
 export const metadata: Metadata = {
-  title: "Skyview Hotels | Luxury Stay & Modern Hospitality",
-  description: "Experience effortless luxury and curated hospitality at Skyview Hotels.",
+  title: `${HOTEL.name} Uyo | Hotel Website Demonstration`,
+  description: `A configurable hotel website demonstration for ${HOTEL.name} in Uyo, Akwa Ibom State.`,
 };
 
 export default function RootLayout({

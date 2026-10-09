@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
-import { MOCK_ROOMS } from "@/lib/data/mock-data";
+import { getRoomCatalog } from '@/lib/rooms';
 
-export async function Get() {
-  return NextResponse.json({ message: "Rooms endpoint active" });
+export async function GET() {
+  const catalog = await getRoomCatalog();
+  return NextResponse.json(catalog);
 }
 
 export async function POST(request: Request) {

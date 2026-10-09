@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Building2, Mail, Lock, User, Phone, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -12,15 +13,44 @@ export default function SignUpPage() {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [confirmationMessage, setConfirmationMessage] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setSaveError(null);
+    setConfirmationMessage(null);
 
-    setTimeout(() => {
+    try {
+      const nameParts = fullName.trim().split(/\s+/);
+      const firstName = nameParts.shift() ?? '';
+      const supabase = createClient();
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/profile`,
+          data: {
+            first_name: firstName,
+            last_name: nameParts.join(' '),
+            phone: phone.trim(),
+          },
+        },
+      });
+      if (error) throw error;
+
+      if (data.session) {
+        router.push('/profile');
+        router.refresh();
+      } else {
+        setConfirmationMessage('Account created. Check your email for a confirmation link before signing in.');
+      }
+    } catch (error: unknown) {
+      setSaveError(error instanceof Error ? error.message : 'Unable to create your guest account.');
+    } finally {
       setLoading(false);
-      router.push('/');
-    }, 800);
+    }
   };
 
   return (
@@ -78,14 +108,24 @@ export default function SignUpPage() {
 
           <div className="mb-6">
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-              Create Your Account
+              Create Your Guest Profile
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              Join Skyview Hotels to manage reservations and access concierge services.
+              Create an account to manage your reservations and guest profile.
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {saveError && (
+              <div role="alert" className="p-3 rounded-xl bg-rose-50 text-rose-700 text-xs font-semibold">
+                {saveError}
+              </div>
+            )}
+            {confirmationMessage && (
+              <div role="status" className="p-3 rounded-xl bg-emerald-50 text-emerald-700 text-xs font-semibold">
+                {confirmationMessage}
+              </div>
+            )}
             <div>
               <label className="text-xs font-semibold text-slate-700 block mb-1">Full Name</label>
               <div className="relative">
@@ -95,7 +135,7 @@ export default function SignUpPage() {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   required
-                  placeholder="Eleanor Vance"
+                  placeholder="Your first and last name"
                   className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
                 />
               </div>
@@ -110,7 +150,7 @@ export default function SignUpPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  placeholder="eleanor@example.com"
+                  placeholder="you@example.com"
                   className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
                 />
               </div>
@@ -132,15 +172,18 @@ export default function SignUpPage() {
             </div>
 
             <div>
-              <label className="text-xs font-semibold text-slate-700 block mb-1">Password</label>
+              <label htmlFor="password" className="text-xs font-semibold text-slate-700 block mb-1">Password</label>
               <div className="relative">
                 <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
+                  id="password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  placeholder="••••••••"
+                  minLength={8}
+                  autoComplete="new-password"
+                  placeholder="At least 8 characters"
                   className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
                 />
               </div>
@@ -151,7 +194,7 @@ export default function SignUpPage() {
               disabled={loading}
               className="w-full py-3 bg-gradient-to-r from-sky-600 via-sky-500 to-cyan-600 hover:from-sky-700 hover:to-cyan-700 text-white font-bold text-sm rounded-xl shadow-md shadow-sky-500/20 transition flex items-center justify-center gap-2 active:scale-98 disabled:opacity-75"
             >
-              <span>{loading ? 'Creating VIP Profile...' : 'Complete Registration'}</span>
+              <span>{loading ? 'Creating Account...' : 'Create Guest Account'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
@@ -165,7 +208,7 @@ export default function SignUpPage() {
 
           <div className="mt-8 p-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center gap-2 text-[11px] text-slate-500">
             <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
-            <span>Your personal information is strictly protected & encrypted</span>
+            <span>Your password is securely managed by Supabase authentication.</span>
           </div>
         </div>
       </div>

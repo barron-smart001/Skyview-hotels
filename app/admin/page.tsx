@@ -33,7 +33,7 @@ export default function AdminDashboardPage() {
             <p className="text-xs text-slate-400 mt-0.5">Real-time status overview of rooms, occupancy, arrivals, and revenue.</p>
           </div>
           <span className="text-xs text-slate-400 bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700">
-            Hotel: <strong className="text-white">Skyview Grand Lagos</strong>
+            Hotel: <strong className="text-white">Skyview Grand Uyo</strong>
           </span>
         </div>
       </div>

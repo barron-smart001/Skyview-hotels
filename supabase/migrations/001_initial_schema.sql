@@ -19,12 +19,12 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 CREATE TABLE IF NOT EXISTS public.hotels (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL DEFAULT 'Skyview Grand Hotel & Suites',
-  slug TEXT UNIQUE NOT NULL DEFAULT 'skyview-lagos',
-  city TEXT NOT NULL DEFAULT 'Lagos',
-  state TEXT NOT NULL DEFAULT 'Lagos State',
+  slug TEXT UNIQUE NOT NULL DEFAULT 'skyview-uyo',
+  city TEXT NOT NULL DEFAULT 'Uyo',
+  state TEXT NOT NULL DEFAULT 'Akwa Ibom State',
   country TEXT NOT NULL DEFAULT 'Nigeria',
-  address TEXT NOT NULL DEFAULT 'Plot 12, Victoria Island Waterfront, Lagos',
-  phone TEXT NOT NULL DEFAULT '+234 1 892 4000',
+  address TEXT NOT NULL DEFAULT 'Uyo, Akwa Ibom State, Nigeria',
+  phone TEXT NOT NULL DEFAULT '+234 803 000 0000',
   email TEXT NOT NULL DEFAULT 'reservations@skyviewhotels.ng',
   currency TEXT NOT NULL DEFAULT 'NGN',
   created_at TIMESTAMPTZ DEFAULT NOW()

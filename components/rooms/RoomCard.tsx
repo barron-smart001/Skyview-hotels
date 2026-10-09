@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { Room } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 import { Users, BedDouble, Maximize2, Star, Sparkles, Check, ChevronRight } from 'lucide-react';
@@ -28,8 +29,8 @@ export function RoomCard({ room, onBookNow }: RoomCardProps) {
           )}
           <div className="absolute top-3 right-3 bg-slate-900/70 backdrop-blur-md text-white text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
             <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-            <span>{room.rating}</span>
-            <span className="text-slate-300 font-normal">({room.reviewCount})</span>
+            <span>{room.rating ?? 'Room'}</span>
+            {room.reviewCount != null && <span className="text-slate-300 font-normal">({room.reviewCount})</span>}
           </div>
           <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-md text-slate-800 text-xs font-medium px-2.5 py-1 rounded-lg">
             {room.type}
@@ -60,7 +61,7 @@ export function RoomCard({ room, onBookNow }: RoomCardProps) {
             </div>
             <div className="flex items-center gap-1.5 truncate">
               <Maximize2 className="w-3.5 h-3.5 text-sky-600 shrink-0" />
-              <span className="truncate">{room.sizeSqFt} sq ft</span>
+              <span className="truncate">{room.sizeSqFt ? `${room.sizeSqFt} sq ft` : 'Size unlisted'}</span>
             </div>
           </div>
 
@@ -77,9 +78,9 @@ export function RoomCard({ room, onBookNow }: RoomCardProps) {
       </div>
 
       {/* Footer & Price */}
-      <div className="px-5 pb-5 pt-3 border-t border-slate-100 flex items-center justify-between">
+        <div className="px-5 pb-5 pt-3 border-t border-slate-100 flex items-end justify-between gap-2">
         <div>
-          <span className="text-xs text-slate-400 block font-medium">Nightly rate</span>
+            <span className="text-xs text-slate-400 block font-medium">{room.available ? 'Available' : 'Unavailable'}</span>
           <div className="flex items-baseline gap-1">
             <span className="text-lg font-extrabold text-slate-900">
               {formatCurrency(room.pricePerNight)}
@@ -88,13 +89,17 @@ export function RoomCard({ room, onBookNow }: RoomCardProps) {
           </div>
         </div>
 
-        <button
-          onClick={() => onBookNow(room)}
-          className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-900 hover:bg-sky-600 text-white rounded-xl text-xs font-semibold shadow-sm hover:shadow transition group-hover:bg-sky-600"
-        >
-          <span>Reserve</span>
-          <ChevronRight className="w-3.5 h-3.5" />
-        </button>
+        <div className="flex flex-col items-end gap-2">
+          <Link href={`/rooms/${encodeURIComponent(room.id)}`} className="text-xs font-bold text-sky-700 hover:text-sky-900">View Details</Link>
+          <button
+            onClick={() => onBookNow(room)}
+            disabled={!room.available}
+            className="inline-flex items-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-sky-600 disabled:cursor-not-allowed disabled:bg-slate-300"
+          >
+            <span>Book This Room</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
     </div>
   );

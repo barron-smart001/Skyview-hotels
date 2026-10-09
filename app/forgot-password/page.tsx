@@ -3,20 +3,30 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { Building2, Mail, ArrowLeft, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
-    setTimeout(() => {
-      setLoading(false);
+    setError(null);
+    try {
+      const supabase = createClient();
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (resetError) throw resetError;
       setSubmitted(true);
-    }, 800);
+    } catch (resetError: unknown) {
+      setError(resetError instanceof Error ? resetError.message : 'Unable to send a password reset link.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -39,7 +49,7 @@ export default function ForgotPasswordPage() {
             </div>
             <h2 className="text-xl font-bold text-slate-900">Recovery Link Sent</h2>
             <p className="text-xs text-slate-500">
-              We have sent a secure password reset link to <span className="font-bold text-slate-800">{email}</span>. Please check your inbox.
+              If an account exists for <span className="font-bold text-slate-800">{email}</span>, a secure password reset link will arrive by email. Check your inbox.
             </p>
             <div className="pt-4">
               <Link
@@ -60,6 +70,11 @@ export default function ForgotPasswordPage() {
             </p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              {error && (
+                <div role="alert" className="p-3 rounded-xl bg-rose-50 text-rose-700 text-xs font-semibold">
+                  {error}
+                </div>
+              )}
               <div>
                 <label className="text-xs font-semibold text-slate-700 block mb-1">Email Address</label>
                 <div className="relative">
@@ -69,7 +84,7 @@ export default function ForgotPasswordPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    placeholder="eleanor@example.com"
+                    placeholder="you@example.com"
                     className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
                   />
                 </div>

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { MOCK_BOOKINGS } from '@/lib/data/mock-data';
 import { formatCurrency } from '@/lib/utils';
-import { Calendar, MapPin, CheckCircle2, Clock, Ban, ChevronRight, Sparkles, Download, MessageSquare } from 'lucide-react';
+import { Calendar, MapPin, CheckCircle2, Clock, Ban, Sparkles, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
 
 export default function BookingsPage() {
@@ -48,14 +48,14 @@ export default function BookingsPage() {
 
       {/* Tabs */}
       <div className="flex border-b border-slate-200 mb-6 gap-6">
-        {[
+        {([
           { key: 'all', label: 'All Stays' },
           { key: 'upcoming', label: 'Upcoming Stays' },
           { key: 'completed', label: 'Past Stays' },
-        ].map((t) => (
+        ] as const).map((t) => (
           <button
             key={t.key}
-            onClick={() => setTab(t.key as any)}
+            onClick={() => setTab(t.key)}
             className={`pb-3 text-sm font-semibold border-b-2 transition -mb-[2px] ${
               tab === t.key
                 ? 'border-sky-600 text-sky-600'
@@ -107,7 +107,7 @@ export default function BookingsPage() {
 
                 <h3 className="text-base font-bold text-slate-900">{b.room.name}</h3>
                 <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
-                  <MapPin className="w-3.5 h-3.5 text-slate-400" /> Skyview Lagos • {b.guestsCount} Guests
+                  <MapPin className="w-3.5 h-3.5 text-slate-400" /> Skyview Uyo • {b.guestsCount} Guests
                 </p>
                 <p className="text-xs text-slate-600 flex items-center gap-1.5 mt-2 font-medium">
                   <Calendar className="w-3.5 h-3.5 text-sky-600" /> {b.checkIn} to {b.checkOut}

@@ -4,9 +4,10 @@ import React, { useState, useMemo } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { RoomCard } from '@/components/rooms/RoomCard';
 import { BookingModal } from '@/components/rooms/BookingModal';
-import { MOCK_ROOMS } from '@/lib/data/mock-data';
+import { useRoomCatalog } from '@/components/rooms/useRoomCatalog';
 import { Room } from '@/types';
 import { formatCurrency } from '@/lib/utils';
+import { HOTEL } from '@/lib/hotel-config';
 import { Filter, SlidersHorizontal, BedDouble, Search, Sparkles } from 'lucide-react';
 
 export default function RoomsPage() {
@@ -15,12 +16,13 @@ export default function RoomsPage() {
   const [maxPrice, setMaxPrice] = useState<number>(300000);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedAmenity, setSelectedAmenity] = useState<string>('all');
+  const { rooms, loading, error } = useRoomCatalog();
 
-  const roomTypes = ['all', 'Standard', 'Deluxe', 'Executive', 'Suite', 'Presidential'];
-  const amenitiesList = ['all', 'Free Wi-Fi', 'Private Jacuzzi', 'Breakfast Included', 'Ocean View Balcony', 'Airport Chauffeur'];
+  const roomTypes = ['all', ...new Set(rooms.map((room) => room.type))];
+  const amenitiesList = ['all', 'Free Wi-Fi', 'Private Jacuzzi', 'Breakfast Included', 'Private Balcony', 'Airport Chauffeur'];
 
   const filteredRooms = useMemo(() => {
-    return MOCK_ROOMS.filter((room) => {
+    return rooms.filter((room) => {
       const matchesType = selectedType === 'all' || room.type === selectedType;
       const matchesPrice = room.pricePerNight <= maxPrice;
       const matchesSearch = room.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -28,7 +30,7 @@ export default function RoomsPage() {
       const matchesAmenity = selectedAmenity === 'all' || room.amenities.some(a => a.toLowerCase().includes(selectedAmenity.toLowerCase()));
       return matchesType && matchesPrice && matchesSearch && matchesAmenity;
     });
-  }, [selectedType, maxPrice, searchQuery, selectedAmenity]);
+  }, [rooms, selectedType, maxPrice, searchQuery, selectedAmenity]);
 
   return (
     <DashboardLayout>
@@ -47,7 +49,7 @@ export default function RoomsPage() {
           </div>
 
           <div className="text-xs font-semibold text-slate-500 bg-white px-4 py-2 rounded-xl border border-slate-200/80 shadow-xs self-start md:self-auto">
-            Showing <span className="text-sky-600 font-bold">{filteredRooms.length}</span> suites available
+            {loading ? 'Loading rooms…' : <>Showing <span className="text-sky-600 font-bold">{filteredRooms.filter((room) => room.available).length}</span> available rooms</>}
           </div>
         </div>
       </div>
@@ -121,7 +123,11 @@ export default function RoomsPage() {
       </div>
 
       {/* Room Listing Cards Grid */}
-      {filteredRooms.length > 0 ? (
+      {error ? (
+        <div role="alert" className="mb-12 rounded-2xl border border-rose-200 bg-rose-50 p-6 text-sm text-rose-800">{error}</div>
+      ) : loading ? (
+        <p className="mb-12 py-12 text-center text-sm text-slate-500">Loading {HOTEL.name} rooms…</p>
+      ) : filteredRooms.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
           {filteredRooms.map((room) => (
             <RoomCard key={room.id} room={room} onBookNow={(r) => setSelectedRoom(r)} />

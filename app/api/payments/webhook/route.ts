@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     const event = JSON.parse(rawBody);
 
     if (event.event === 'charge.success') {
-      const { reference, amount, customer, channel } = event.data;
+      const { reference, amount, channel } = event.data;
       const amountInNaira = amount / 100;
 
       try {
@@ -48,7 +48,8 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ received: true }, { status: 200 });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message || 'Webhook handler failed' }, { status: 500 });
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Webhook handler failed';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

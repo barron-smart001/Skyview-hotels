@@ -3,27 +3,48 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Building2, Mail, Lock, ArrowRight, ShieldCheck, Sparkles, User, Briefcase } from 'lucide-react';
+import { Building2, Mail, Lock, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
 export default function SignInPage() {
   const router = useRouter();
-  const [role, setRole] = useState<'guest' | 'staff'>('guest');
-  const [email, setEmail] = useState('eleanor.vance@example.com');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [signInError, setSignInError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setSignInError(null);
 
-    setTimeout(() => {
-      setLoading(false);
-      if (role === 'staff') {
-        router.push('/');
-      } else {
-        router.push('/');
+    try {
+      const supabase = createClient();
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+      if (error) throw error;
+
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', data.user.id)
+        .maybeSingle();
+      if (profileError) throw profileError;
+
+      if (profile?.role !== 'guest') {
+        await supabase.auth.signOut();
+        throw new Error('This sign-in is for guest accounts. Use the staff portal to access staff accounts.');
       }
-    }, 800);
+
+      router.push('/profile');
+      router.refresh();
+    } catch (error: unknown) {
+      setSignInError(error instanceof Error ? error.message : 'Unable to sign in. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -84,37 +105,16 @@ export default function SignInPage() {
               Sign In to Your Account
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              Access your reservations, VIP privileges, and concierge preferences.
+              Sign in to manage your guest profile and reservations.
             </p>
           </div>
 
-          {/* Role selector */}
-          <div className="grid grid-cols-2 gap-2 p-1 bg-slate-100 rounded-2xl mb-6">
-            <button
-              type="button"
-              onClick={() => setRole('guest')}
-              className={`py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 ${
-                role === 'guest'
-                  ? 'bg-white text-slate-900 shadow-xs'
-                  : 'text-slate-500 hover:text-slate-900'
-              }`}
-            >
-              <User className="w-3.5 h-3.5" /> Guest Portal
-            </button>
-            <button
-              type="button"
-              onClick={() => setRole('staff')}
-              className={`py-2 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 ${
-                role === 'staff'
-                  ? 'bg-white text-slate-900 shadow-xs'
-                  : 'text-slate-500 hover:text-slate-900'
-              }`}
-            >
-              <Briefcase className="w-3.5 h-3.5" /> Staff / Admin
-            </button>
-          </div>
-
           <form onSubmit={handleSubmit} className="space-y-4">
+            {signInError && (
+              <div role="alert" className="p-3 rounded-xl bg-rose-50 text-rose-700 text-xs font-semibold">
+                {signInError}
+              </div>
+            )}
             <div>
               <label className="text-xs font-semibold text-slate-700 block mb-1">Email Address</label>
               <div className="relative">
@@ -124,6 +124,7 @@ export default function SignInPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
+                  autoComplete="email"
                   placeholder="name@example.com"
                   className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
                 />
@@ -147,6 +148,7 @@ export default function SignInPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  autoComplete="current-password"
                   placeholder="••••••••"
                   className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
                 />
@@ -158,7 +160,7 @@ export default function SignInPage() {
               disabled={loading}
               className="w-full py-3 bg-gradient-to-r from-sky-600 via-sky-500 to-cyan-600 hover:from-sky-700 hover:to-cyan-700 text-white font-bold text-sm rounded-xl shadow-md shadow-sky-500/20 transition flex items-center justify-center gap-2 active:scale-98 disabled:opacity-75"
             >
-              <span>{loading ? 'Authenticating...' : `Sign In as ${role === 'guest' ? 'Guest' : 'Staff'}`}</span>
+              <span>{loading ? 'Signing In...' : 'Sign In as Guest'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>

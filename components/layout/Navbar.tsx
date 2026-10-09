@@ -12,10 +12,10 @@ import {
   User, 
   Search,
   Bell, 
-  ShieldCheck,
   Menu,
   X
 } from 'lucide-react';
+import { useGuestProfile } from '@/lib/guest-profile';
 
 const NAV_ITEMS = [
   { label: 'Overview', href: '/', icon: Home },
@@ -28,6 +28,11 @@ const NAV_ITEMS = [
 export function Sidebar() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = React.useState(false);
+  const { profile, avatarUrl, error } = useGuestProfile();
+  const fullName = `${profile.firstName} ${profile.lastName}`.trim();
+  const initials = fullName
+    ? fullName.split(/\s+/).map((part) => part[0]).join('').slice(0, 2).toUpperCase()
+    : 'G';
 
   return (
     <>
@@ -95,22 +100,21 @@ export function Sidebar() {
         {/* User Card in Sidebar Footer */}
         <div className="p-4 m-4 rounded-2xl bg-gradient-to-b from-sky-50 to-blue-50/50 border border-sky-100/80">
           <div className="flex items-center gap-3 mb-3">
-            <div className="relative w-10 h-10 rounded-full overflow-hidden ring-2 ring-white shadow-xs">
-              <img
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80"
-                alt="Eleanor Vance"
-                className="w-full h-full object-cover"
-              />
-              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-white" />
-            </div>
+            {avatarUrl ? (
+              <img src={avatarUrl} alt={`${fullName || 'Guest'} profile`} className="h-10 w-10 rounded-full object-cover ring-2 ring-white shadow-xs" />
+            ) : (
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-600 text-sm font-bold text-white ring-2 ring-white shadow-xs">
+                {initials}
+              </div>
+            )}
             <div className="overflow-hidden">
-              <h4 className="text-sm font-semibold text-slate-900 truncate">Eleanor Vance</h4>
-              <p className="text-xs text-slate-500 truncate">eleanor.v@example.com</p>
+              <h4 className="text-sm font-semibold text-slate-900 truncate">{fullName || 'Guest'}</h4>
+              <p className="text-xs text-slate-500 truncate">{profile.email || 'No email saved'}</p>
             </div>
           </div>
           <div className="flex items-center justify-between pt-2 border-t border-sky-100 text-xs text-sky-700 font-medium">
-            <span>Skyview VIP Tier</span>
-            <span className="flex items-center gap-1"><ShieldCheck className="w-3.5 h-3.5 text-sky-600" /> Gold</span>
+            <span>Skyview Guest</span>
+            {error && <span className="text-rose-600" role="status">Profile unavailable</span>}
           </div>
         </div>
       </aside>
