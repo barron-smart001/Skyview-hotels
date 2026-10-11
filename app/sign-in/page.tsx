@@ -38,7 +38,7 @@ export default function SignInPage() {
         throw new Error('This sign-in is for guest accounts. Use the staff portal to access staff accounts.');
       }
 
-      router.push('/profile');
+      router.push('/');
       router.refresh();
     } catch (error: unknown) {
       setSignInError(error instanceof Error ? error.message : 'Unable to sign in. Please try again.');

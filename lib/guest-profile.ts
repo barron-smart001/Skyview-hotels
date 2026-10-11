@@ -155,13 +155,11 @@ export function useGuestProfile() {
       window.setTimeout(() => void refreshProfile(), 0);
     });
     window.addEventListener(PROFILE_CHANGE_EVENT, refreshProfile);
-    window.addEventListener('storage', refreshProfile);
 
     return () => {
       active = false;
       subscription.unsubscribe();
       window.removeEventListener(PROFILE_CHANGE_EVENT, refreshProfile);
-      window.removeEventListener('storage', refreshProfile);
     };
   }, []);
 

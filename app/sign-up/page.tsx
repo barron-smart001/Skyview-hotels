@@ -30,7 +30,7 @@ export default function SignUpPage() {
         email: email.trim(),
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/profile`,
+          emailRedirectTo: `${window.location.origin}/`,
           data: {
             first_name: firstName,
             last_name: nameParts.join(' '),
@@ -41,7 +41,7 @@ export default function SignUpPage() {
       if (error) throw error;
 
       if (data.session) {
-        router.push('/profile');
+        router.push('/');
         router.refresh();
       } else {
         setConfirmationMessage('Account created. Check your email for a confirmation link before signing in.');
