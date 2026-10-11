@@ -35,6 +35,8 @@ export default function ProfilePage() {
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [signOutError, setSignOutError] = useState<string | null>(null);
+  const [signOutDialogOpen, setSignOutDialogOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
   const [photoMenuOpen, setPhotoMenuOpen] = useState(false);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
@@ -161,6 +163,7 @@ export default function ProfilePage() {
 
   const handleSignOut = async () => {
     setSignOutError(null);
+    setSigningOut(true);
     try {
       const { error } = await createClient().auth.signOut();
       if (error) throw error;
@@ -168,6 +171,8 @@ export default function ProfilePage() {
       router.refresh();
     } catch (error: unknown) {
       setSignOutError(error instanceof Error ? error.message : 'Unable to sign out.');
+    } finally {
+      setSigningOut(false);
     }
   };
 
@@ -366,7 +371,10 @@ export default function ProfilePage() {
             {signOutError && <p role="alert" className="mt-3 text-xs font-semibold text-rose-700">{signOutError}</p>}
             <button
               type="button"
-              onClick={handleSignOut}
+              onClick={() => {
+                setSignOutError(null);
+                setSignOutDialogOpen(true);
+              }}
               className="mt-4 inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-50"
             >
               <LogOut className="h-4 w-4" /> Sign Out
@@ -374,6 +382,40 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+
+      {signOutDialogOpen && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/60 p-4"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget && !signingOut) setSignOutDialogOpen(false);
+          }}
+        >
+          <section role="dialog" aria-modal="true" aria-labelledby="sign-out-dialog-title" className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
+            <h2 id="sign-out-dialog-title" className="text-base font-bold text-slate-900">Sign out of your account?</h2>
+            <p className="mt-2 text-sm text-slate-600">You will need to sign in again to access your guest account and reservations.</p>
+            {signOutError && <p role="alert" className="mt-4 rounded-lg bg-rose-50 p-3 text-xs font-semibold text-rose-700">{signOutError}</p>}
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setSignOutDialogOpen(false)}
+                disabled={signingOut}
+                className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-bold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleSignOut()}
+                disabled={signingOut}
+                className="inline-flex items-center gap-2 rounded-xl bg-rose-600 px-4 py-2.5 text-xs font-bold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <LogOut className="h-4 w-4" /> {signingOut ? 'Signing out…' : 'Sign Out'}
+              </button>
+            </div>
+          </section>
+        </div>
+      )}
 
       {photoMenuOpen && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/60 p-4" role="presentation" onMouseDown={(event) => {
