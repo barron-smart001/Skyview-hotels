@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { AdminLayout } from '@/components/admin/AdminLayout';
 import { useAdminRooms } from '@/components/admin/useAdminRooms';
 import { formatCurrency } from '@/lib/utils';
@@ -85,7 +86,7 @@ export default function AdminRoomsPage() {
                   <tr key={room.id} className="hover:bg-slate-900/40 transition">
                     <td className="p-4 flex items-center gap-3">
                       {room.image ? (
-                        <img src={room.image} alt={room.name} className="w-14 h-10 rounded-lg object-cover" />
+                        <Image src={room.image} alt={room.name} width={56} height={40} className="w-14 h-10 rounded-lg object-cover" />
                       ) : (
                         <div className="w-14 h-10 rounded-lg bg-slate-800" />
                       )}

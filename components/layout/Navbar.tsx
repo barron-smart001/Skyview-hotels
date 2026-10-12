@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
@@ -64,7 +65,7 @@ export function Sidebar() {
         <div className="p-6">
           {/* Brand Logo */}
           <Link href="/" className="flex items-center gap-3 group mb-8">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-cyan-500 flex items-center justify-center text-white shadow-md shadow-sky-500/20 group-hover:scale-105 transition">
+            <div className="w-10 h-10 rounded-xl bg-linear-to-tr from-sky-600 to-cyan-500 flex items-center justify-center text-white shadow-md shadow-sky-500/20 group-hover:scale-105 transition">
               <Building2 className="w-5 h-5" />
             </div>
             <div>
@@ -98,10 +99,10 @@ export function Sidebar() {
         </div>
 
         {/* User Card in Sidebar Footer */}
-        <div className="p-4 m-4 rounded-2xl bg-gradient-to-b from-sky-50 to-blue-50/50 border border-sky-100/80">
+        <div className="p-4 m-4 rounded-2xl bg-linear-to-b from-sky-50 to-blue-50/50 border border-sky-100/80">
           <div className="flex items-center gap-3 mb-3">
             {avatarUrl ? (
-              <img src={avatarUrl} alt={`${fullName || 'Guest'} profile`} className="h-10 w-10 rounded-full object-cover ring-2 ring-white shadow-xs" />
+              <Image src={avatarUrl} alt={`${fullName || 'Guest'} profile`} width={40} height={40} unoptimized className="h-10 w-10 rounded-full object-cover ring-2 ring-white shadow-xs" />
             ) : (
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-sky-600 text-sm font-bold text-white ring-2 ring-white shadow-xs">
                 {initials}
@@ -144,7 +145,7 @@ export function Header() {
 
         <Link
           href="/rooms"
-          className="hidden sm:inline-flex items-center gap-2 bg-gradient-to-r from-sky-600 to-cyan-600 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md hover:from-sky-700 hover:to-cyan-700 transition"
+          className="hidden sm:inline-flex items-center gap-2 bg-linear-to-r from-sky-600 to-cyan-600 text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md hover:from-sky-700 hover:to-cyan-700 transition"
         >
           Explore Rooms
         </Link>

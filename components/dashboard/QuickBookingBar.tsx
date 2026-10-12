@@ -92,7 +92,7 @@ export function QuickBookingBar() {
         <div>
           <button
             type="submit"
-            className="w-full py-2.5 px-4 bg-gradient-to-r from-sky-600 via-sky-500 to-cyan-600 hover:from-sky-700 hover:to-cyan-700 text-white font-semibold rounded-xl shadow-md shadow-sky-500/25 flex items-center justify-center gap-2 text-sm transition-all transform active:scale-98"
+            className="w-full py-2.5 px-4 bg-linear-to-r from-sky-600 via-sky-500 to-cyan-600 hover:from-sky-700 hover:to-cyan-700 text-white font-semibold rounded-xl shadow-md shadow-sky-500/25 flex items-center justify-center gap-2 text-sm transition-all transform active:scale-98"
           >
             <Search className="w-4 h-4" />
             <span>Search Availability</span>

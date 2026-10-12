@@ -57,7 +57,7 @@ export default function ResetPasswordPage() {
     <div className="min-h-screen flex items-center justify-center p-6 bg-slate-900">
       <div className="max-w-md w-full bg-white rounded-3xl p-8 sm:p-10 shadow-2xl">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-cyan-500 flex items-center justify-center text-white">
+          <div className="w-10 h-10 rounded-xl bg-linear-to-tr from-sky-600 to-cyan-500 flex items-center justify-center text-white">
             <Building2 className="w-5 h-5" />
           </div>
           <div>
@@ -105,7 +105,7 @@ export default function ResetPasswordPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-gradient-to-r from-sky-600 to-cyan-600 text-white font-bold text-sm rounded-xl shadow-md transition disabled:opacity-75"
+              className="w-full py-3 bg-linear-to-r from-sky-600 to-cyan-600 text-white font-bold text-sm rounded-xl shadow-md transition disabled:opacity-75"
             >
               {loading ? 'Updating Password…' : 'Update Password'}
             </button>

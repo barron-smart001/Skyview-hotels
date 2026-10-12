@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { Room } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 import { X, Calendar, User, Mail, Phone, CreditCard, ShieldCheck, CheckCircle2 } from 'lucide-react';
@@ -137,11 +138,11 @@ export function BookingModal({ room, onClose, onSuccess }: BookingModalProps) {
             {error && <p role="alert" className="rounded-xl bg-rose-50 p-3 text-xs font-semibold text-rose-700">{error}</p>}
             {/* Room Summary Preview */}
             <div className="flex items-center gap-4 p-3 bg-sky-50/60 border border-sky-100 rounded-2xl">
-              <img
-                src={room.images[0]}
-                alt={room.name}
-                className="w-16 h-16 rounded-xl object-cover"
-              />
+              {room.images[0] ? (
+                <Image src={room.images[0]} alt={room.name} width={64} height={64} className="w-16 h-16 rounded-xl object-cover" />
+                ) : (
+                <div className="w-16 h-16 rounded-xl bg-slate-100" />
+                )}
               <div className="flex-1 min-w-0">
                 <h4 className="text-sm font-bold text-slate-900 truncate">{room.name}</h4>
                 <p className="text-xs text-sky-700 font-medium">{formatCurrency(room.pricePerNight)} / night</p>
@@ -263,7 +264,7 @@ export function BookingModal({ room, onClose, onSuccess }: BookingModalProps) {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3 bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-700 hover:to-cyan-700 text-white rounded-xl font-bold text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 disabled:opacity-75"
+              className="w-full py-3 bg-linear-to-r from-sky-600 to-cyan-600 hover:from-sky-700 hover:to-cyan-700 text-white rounded-xl font-bold text-sm shadow-md flex items-center justify-center gap-2 transition active:scale-98 disabled:opacity-75"
             >
               <CreditCard className="w-4 h-4" />
               {isSubmitting ? 'Sending your enquiry...' : 'Request this stay'}

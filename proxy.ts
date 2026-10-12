@@ -32,5 +32,5 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   // Only routes that read the session on the server; public pages skip this round trip.
-  matcher: ['/admin/:path*', '/api/admin/:path*', '/api/bookings/:path*', '/bookings'],
+  matcher: ['/admin/:path*', '/api/admin/:path*', '/api/bookings/:path*', '/api/service-requests', '/bookings', '/services'],
 };

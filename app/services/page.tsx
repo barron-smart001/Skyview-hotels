@@ -1,52 +1,99 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { MOCK_SERVICES, MOCK_REQUESTS } from '@/lib/data/mock-data';
 import { HotelService, ServiceRequest } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 import { Sparkles, Clock, CheckCircle2, MessageSquare, Plus, X, Send } from 'lucide-react';
 
+type RequestsState = 'loading' | 'ready' | 'signed-out' | 'error';
+
 export default function ServicesPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedService, setSelectedService] = useState<HotelService | null>(null);
-  const [requests, setRequests] = useState<ServiceRequest[]>(MOCK_REQUESTS);
+  const [services, setServices] = useState<HotelService[]>([]);
+  const [servicesLoading, setServicesLoading] = useState(true);
+  const [requests, setRequests] = useState<ServiceRequest[]>([]);
+  const [requestsState, setRequestsState] = useState<RequestsState>('loading');
   const [time, setTime] = useState('Tomorrow at 3:00 PM');
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [error, setError] = useState('');
 
   const categories = ['all', 'Spa & Wellness', 'Concierge', 'Room Service', 'Tours & Experiences'];
 
-  const filteredServices = selectedCategory === 'all'
-    ? MOCK_SERVICES
-    : MOCK_SERVICES.filter((s) => s.category === selectedCategory);
+  useEffect(() => {
+    const controller = new AbortController();
+    const { signal } = controller;
 
-  const handleRequestSubmit = (e: React.FormEvent) => {
+    fetch('/api/services', { signal })
+      .then(async (response) => {
+        const result = await response.json();
+        if (!response.ok || !Array.isArray(result.services)) throw new Error('Services could not be loaded.');
+        setServices(result.services);
+      })
+      .catch((loadError: unknown) => {
+        if (loadError instanceof Error && loadError.name === 'AbortError') return;
+        setError('Services could not be loaded right now.');
+      })
+      .finally(() => {
+        if (!signal.aborted) setServicesLoading(false);
+      });
+
+    fetch('/api/service-requests', { signal })
+      .then(async (response) => {
+        if (response.status === 401) return setRequestsState('signed-out');
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error);
+        setRequests(result.requests);
+        setRequestsState('ready');
+      })
+      .catch((loadError: unknown) => {
+        if (loadError instanceof Error && loadError.name === 'AbortError') return;
+        setRequestsState('error');
+      });
+
+    return () => controller.abort();
+  }, []);
+
+  const filteredServices = selectedCategory === 'all'
+    ? services
+    : services.filter((s) => s.category === selectedCategory);
+
+  const closeModal = () => {
+    setSelectedService(null);
+    setSuccessMessage('');
+    setError('');
+    setNotes('');
+  };
+
+  const handleRequestSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedService) return;
     setIsSubmitting(true);
+    setError('');
 
-    setTimeout(() => {
-      const newReq: ServiceRequest = {
-        id: `req-${Date.now()}`,
-        serviceId: selectedService.id,
-        serviceName: selectedService.name,
-        category: selectedService.category,
-        requestedTime: time,
-        status: 'Pending',
-        notes: notes || undefined,
-        createdAt: 'Just now',
-      };
-      setRequests([newReq, ...requests]);
-      setIsSubmitting(false);
+    try {
+      const response = await fetch('/api/service-requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ serviceId: selectedService.id, requestedTime: time, notes }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'We could not send your request.');
+
+      setRequests((prev) => [result.request, ...prev]);
+      setRequestsState('ready');
       setSuccessMessage('Service request submitted to concierge team!');
-      setTimeout(() => {
-        setSuccessMessage('');
-        setSelectedService(null);
-        setNotes('');
-      }, 1500);
-    }, 800);
+      window.setTimeout(closeModal, 1500);
+    } catch (submitError) {
+      setError(submitError instanceof Error ? submitError.message : 'We could not send your request.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -80,6 +127,11 @@ export default function ServicesPage() {
         ))}
       </div>
 
+      {servicesLoading && <p className="mb-6 text-sm text-slate-500">Loading services…</p>}
+      {!servicesLoading && !selectedService && error && (
+        <p role="alert" className="mb-6 rounded-xl bg-rose-50 p-3 text-xs font-semibold text-rose-700">{error}</p>
+      )}
+
       {/* Services Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         {filteredServices.map((service) => (
@@ -89,11 +141,15 @@ export default function ServicesPage() {
           >
             <div>
               <div className="relative h-44 w-full overflow-hidden bg-slate-100">
-                <img
-                  src={service.image}
-                  alt={service.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
+                {service.image ? (
+                  <Image
+                    src={service.image}
+                    alt={service.name}
+                    fill
+                    sizes="(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  ) : null}
                 <span className="absolute top-3 left-3 bg-slate-900/70 backdrop-blur-md text-white text-[11px] font-medium px-2.5 py-0.5 rounded-md">
                   {service.category}
                 </span>
@@ -140,6 +196,17 @@ export default function ServicesPage() {
         </h3>
         <p className="text-xs text-slate-500 mb-4">Track orders dispatched to your suite</p>
 
+        {requestsState === 'loading' && <p className="py-4 text-xs text-slate-500">Loading your requests…</p>}
+        {requestsState === 'signed-out' && (
+          <p className="py-4 text-xs text-slate-500">
+            <Link href="/sign-in?next=/services" className="font-semibold text-sky-600">Sign in</Link> to request services and track them here.
+          </p>
+        )}
+        {requestsState === 'error' && <p className="py-4 text-xs text-rose-600">Your requests could not be loaded right now.</p>}
+        {requestsState === 'ready' && requests.length === 0 && (
+          <p className="py-4 text-xs text-slate-500">You have no service requests yet.</p>
+        )}
+
         <div className="divide-y divide-slate-100">
           {requests.map((req) => (
             <div key={req.id} className="py-3 flex items-center justify-between gap-4">
@@ -170,7 +237,8 @@ export default function ServicesPage() {
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-base font-bold text-slate-900">Request {selectedService.name}</h3>
               <button
-                onClick={() => setSelectedService(null)}
+                onClick={closeModal}
+                aria-label="Close"
                 className="p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100"
               >
                 <X className="w-5 h-5" />
@@ -183,6 +251,7 @@ export default function ServicesPage() {
               </div>
             ) : (
               <form onSubmit={handleRequestSubmit} className="space-y-4">
+                {error && <p role="alert" className="rounded-xl bg-rose-50 p-3 text-xs font-semibold text-rose-700">{error}</p>}
                 <div>
                   <label className="text-xs font-semibold text-slate-700 block mb-1">Preferred Time / Delivery</label>
                   <input

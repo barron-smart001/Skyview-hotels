@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Building2, Mail, Lock, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
@@ -33,12 +34,18 @@ export default function SignInPage() {
         .maybeSingle();
       if (profileError) throw profileError;
 
-      if (profile?.role !== 'guest') {
+      if (!profile) {
         await supabase.auth.signOut();
-        throw new Error('This sign-in is for guest accounts. Use the staff portal to access staff accounts.');
+        throw new Error('No profile was found for this account. Please contact the hotel.');
       }
 
-      router.push('/');
+      // Staff land on the operations portal; everyone else returns to where they were headed.
+      const isStaff = ['receptionist', 'manager', 'admin'].includes(profile.role);
+      const next = new URLSearchParams(window.location.search).get('next');
+      const safeNext = next && next.startsWith('/') && !next.startsWith('//') && !next.startsWith('/\\') ? next : null;
+      const destination = safeNext && (isStaff || !safeNext.startsWith('/admin')) ? safeNext : isStaff ? '/admin' : '/';
+
+      router.push(destination);
       router.refresh();
     } catch (error: unknown) {
       setSignInError(error instanceof Error ? error.message : 'Unable to sign in. Please try again.');
@@ -52,18 +59,20 @@ export default function SignInPage() {
       {/* Left visual banner */}
       <div className="relative hidden lg:flex flex-col justify-between p-12 overflow-hidden bg-slate-950">
         <div className="absolute inset-0 z-0">
-          <img
+          <Image
             src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1600&q=80"
             alt="Skyview Grand Exterior"
-            className="w-full h-full object-cover opacity-35"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent" />
+            fill
+            sizes="50vw"
+            className="object-cover opacity-35"
+            />
+          <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/60 to-transparent" />
         </div>
 
         {/* Brand */}
         <div className="relative z-10">
-          <Link href="/" className="flex items-center gap-3 group inline-flex">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-sky-500 to-cyan-400 flex items-center justify-center text-slate-950 shadow-lg shadow-sky-500/30">
+          <Link href="/" className="inline-flex items-center gap-3 group">
+            <div className="w-11 h-11 rounded-2xl bg-linear-to-tr from-sky-500 to-cyan-400 flex items-center justify-center text-slate-950 shadow-lg shadow-sky-500/30">
               <Building2 className="w-6 h-6" />
             </div>
             <div>
@@ -94,7 +103,7 @@ export default function SignInPage() {
         <div className="max-w-md w-full">
           {/* Mobile brand header */}
           <div className="lg:hidden flex items-center gap-2.5 mb-8">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-600 to-cyan-500 flex items-center justify-center text-white">
+            <div className="w-9 h-9 rounded-xl bg-linear-to-tr from-sky-600 to-cyan-500 flex items-center justify-center text-white">
               <Building2 className="w-5 h-5" />
             </div>
             <span className="font-extrabold text-lg text-slate-900 tracking-tight">SKYVIEW HOTELS</span>
@@ -158,7 +167,7 @@ export default function SignInPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-gradient-to-r from-sky-600 via-sky-500 to-cyan-600 hover:from-sky-700 hover:to-cyan-700 text-white font-bold text-sm rounded-xl shadow-md shadow-sky-500/20 transition flex items-center justify-center gap-2 active:scale-98 disabled:opacity-75"
+              className="w-full py-3 bg-linear-to-r from-sky-600 via-sky-500 to-cyan-600 hover:from-sky-700 hover:to-cyan-700 text-white font-bold text-sm rounded-xl shadow-md shadow-sky-500/20 transition flex items-center justify-center gap-2 active:scale-98 disabled:opacity-75"
             >
               <span>{loading ? 'Signing In...' : 'Sign In as Guest'}</span>
               <ArrowRight className="w-4 h-4" />

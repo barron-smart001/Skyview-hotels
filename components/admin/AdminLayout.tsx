@@ -30,7 +30,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         <div className="p-6">
           {/* Brand */}
           <Link href="/admin" className="flex items-center gap-3 mb-8">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-cyan-400 flex items-center justify-center text-slate-950 shadow-md shadow-sky-500/20 font-bold">
+            <div className="w-10 h-10 rounded-xl bg-linear-to-tr from-sky-500 to-cyan-400 flex items-center justify-center text-slate-950 shadow-md shadow-sky-500/20 font-bold">
               <Building2 className="w-5 h-5" />
             </div>
             <div>

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import type { Booking } from '@/types';
 import { formatCurrency } from '@/lib/utils';
@@ -74,7 +75,7 @@ export default function BookingsPage() {
 
         <Link
           href="/rooms"
-          className="self-start md:self-auto px-4 py-2.5 bg-gradient-to-r from-sky-600 to-cyan-600 hover:from-sky-700 hover:to-cyan-700 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-sm transition"
+          className="self-start md:self-auto px-4 py-2.5 bg-linear-to-r from-sky-600 to-cyan-600 hover:from-sky-700 hover:to-cyan-700 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-sm transition"
         >
           Book New Suite
         </Link>
@@ -90,7 +91,7 @@ export default function BookingsPage() {
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`pb-3 text-sm font-semibold border-b-2 transition -mb-[2px] ${
+            className={`pb-3 text-sm font-semibold border-b-2 transition -mb-0.5 ${
               tab === t.key
                 ? 'border-sky-600 text-sky-600'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -131,11 +132,14 @@ export default function BookingsPage() {
           >
             <div className="flex flex-col sm:flex-row gap-5 items-start sm:items-center">
               {b.room.images[0] ? (
-                <img
+                <Image
                   src={b.room.images[0]}
                   alt={b.room.name}
+                  width={288}
+                  height={224}
+                  sizes="(min-width: 640px) 144px, 100vw"
                   className="w-full sm:w-36 h-28 rounded-xl object-cover"
-                />
+                  />
               ) : (
                 <div className="w-full sm:w-36 h-28 rounded-xl bg-slate-100" />
               )}

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { Room } from '@/types';
 import { formatCurrency } from '@/lib/utils';
@@ -17,11 +18,15 @@ export function RoomCard({ room, onBookNow }: RoomCardProps) {
       <div>
         {/* Image Container */}
         <div className="relative h-56 w-full overflow-hidden bg-slate-100">
-          <img
-            src={room.images[0]}
-            alt={room.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          />
+          {room.images[0] ? (
+            <Image
+              src={room.images[0]}
+              alt={room.name}
+              fill
+              sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+            ) : null}
           {room.featured && (
             <span className="absolute top-3 left-3 bg-sky-600/90 backdrop-blur-md text-white text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-sm">
               <Sparkles className="w-3 h-3" /> Featured Suite

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { Camera, Check, ImagePlus, Lock, LogOut, Mail, MapPin, Phone, Sparkles, User, X } from 'lucide-react';
@@ -208,8 +209,11 @@ export default function ProfilePage() {
           <div className="bg-white rounded-3xl border border-slate-200/90 p-6 shadow-sm text-center">
             <div className="relative h-24 w-24 mx-auto mb-4">
               {avatarPreview || avatarUrl ? (
-                <img
+                <Image
                   src={avatarPreview ?? avatarUrl ?? ''}
+                  width={96}
+                  height={96}
+                  unoptimized
                   alt={`${fullName || 'Guest'} profile`}
                   className="h-24 w-24 rounded-full object-cover ring-4 ring-sky-100 shadow-md"
                 />
@@ -385,7 +389,7 @@ export default function ProfilePage() {
 
       {signOutDialogOpen && (
         <div
-          className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/60 p-4"
+          className="fixed inset-0 z-60 flex items-center justify-center bg-slate-950/60 p-4"
           role="presentation"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget && !signingOut) setSignOutDialogOpen(false);
@@ -418,7 +422,7 @@ export default function ProfilePage() {
       )}
 
       {photoMenuOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/60 p-4" role="presentation" onMouseDown={(event) => {
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-slate-950/60 p-4" role="presentation" onMouseDown={(event) => {
           if (event.target === event.currentTarget) setPhotoMenuOpen(false);
         }}>
           <section role="dialog" aria-modal="true" aria-labelledby="photo-dialog-title" className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
@@ -460,7 +464,7 @@ export default function ProfilePage() {
       )}
 
       {cameraOpen && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/80 p-4">
+        <div className="fixed inset-0 z-70 flex items-center justify-center bg-slate-950/80 p-4">
           <section role="dialog" aria-modal="true" aria-labelledby="camera-dialog-title" className="w-full max-w-lg rounded-2xl bg-white p-5 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
               <h2 id="camera-dialog-title" className="text-base font-bold text-slate-900">Take a profile photo</h2>

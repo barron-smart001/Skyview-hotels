@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft, BedDouble, Check, Users } from 'lucide-react';
 import { BookingModal } from '@/components/rooms/BookingModal';
@@ -22,11 +23,11 @@ export function RoomDetails({ room }: { room: Room }) {
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1.2fr)_minmax(300px,0.8fr)]">
         <section>
           <div className="overflow-hidden rounded-2xl bg-slate-100">
-            {activeImage ? <img src={activeImage} alt={room.name} className="aspect-[4/3] w-full object-cover" /> : <div className="flex aspect-[4/3] items-center justify-center text-sm text-slate-500">No room photographs provided</div>}
+            {activeImage ? <Image src={activeImage} alt={room.name} width={1200} height={900} sizes="(min-width: 1024px) 60vw, 100vw" priority className="aspect-4/3 w-full object-cover" /> : <div className="flex aspect-4/3 items-center justify-center text-sm text-slate-500">No room photographs provided</div>}
           </div>
           {room.images.length > 1 && <div className="mt-3 grid grid-cols-4 gap-3">
             {room.images.map((image, index) => <button key={`${image}-${index}`} type="button" onClick={() => setActiveImage(image)} aria-label={`Show room photo ${index + 1}`} aria-pressed={activeImage === image} className={`overflow-hidden rounded-lg border-2 ${activeImage === image ? 'border-sky-600' : 'border-transparent'}`}>
-              <img src={image} alt={`${room.name}, photo ${index + 1}`} className="aspect-[4/3] w-full object-cover" />
+              <Image src={image} alt={`${room.name}, photo ${index + 1}`} width={300} height={225} sizes="(min-width: 1024px) 15vw, 25vw" className="aspect-4/3 w-full object-cover" />
             </button>)}
           </div>}
         </section>
