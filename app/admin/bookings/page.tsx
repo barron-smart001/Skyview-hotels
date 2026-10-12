@@ -1,25 +1,96 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
-import { MOCK_BOOKINGS } from '@/lib/data/mock-data';
 import { Booking } from '@/types';
 import { formatCurrency } from '@/lib/utils';
-import { LogIn, LogOut, XCircle } from 'lucide-react';
+import { CheckCircle2, LogIn, LogOut, XCircle } from 'lucide-react';
+
+type BookingsResponse = { bookings: Booking[]; total: number; page: number; pageSize: number; error?: string };
+
+const FILTERS = ['all', 'pending', 'confirmed', 'checked-in', 'completed', 'cancelled'] as const;
 
 export default function AdminBookingsPage() {
-  const [bookings, setBookings] = useState<Booking[]>(MOCK_BOOKINGS);
-  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [filterStatus, setFilterStatus] = useState<(typeof FILTERS)[number]>('all');
+  const [page, setPage] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
 
-  const updateBookingStatus = (id: string, newStatus: Booking['status']) => {
-    setBookings(prev =>
-      prev.map(b => (b.id === id ? { ...b, status: newStatus } : b))
-    );
+  const loadPage = useCallback(async (status: string, pageToLoad: number, signal?: AbortSignal) => {
+    const params = new URLSearchParams({ page: String(pageToLoad) });
+    if (status !== 'all') params.set('status', status);
+    const response = await fetch(`/api/admin/bookings?${params}`, { signal });
+    const result = (await response.json()) as BookingsResponse;
+    if (!response.ok) throw new Error(result.error || 'Bookings could not be loaded.');
+    return result;
+  }, []);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    loadPage(filterStatus, 0, controller.signal)
+      .then((result) => {
+        setBookings(result.bookings);
+        setTotal(result.total);
+        setPage(0);
+      })
+      .catch((loadError: unknown) => {
+        if (loadError instanceof Error && loadError.name === 'AbortError') return;
+        setError(loadError instanceof Error ? loadError.message : 'Bookings could not be loaded.');
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+    return () => controller.abort();
+  }, [filterStatus, loadPage]);
+
+  const selectFilter = (status: (typeof FILTERS)[number]) => {
+    if (status === filterStatus) return;
+    setLoading(true);
+    setError('');
+    setBookings([]);
+    setFilterStatus(status);
   };
 
-  const filtered = bookings.filter(b =>
-    filterStatus === 'all' ? true : b.status === filterStatus
-  );
+  const loadMore = async () => {
+    setLoading(true);
+    try {
+      const result = await loadPage(filterStatus, page + 1);
+      setBookings((prev) => [...prev, ...result.bookings]);
+      setPage(result.page);
+      setTotal(result.total);
+    } catch (loadError) {
+      setError(loadError instanceof Error ? loadError.message : 'Bookings could not be loaded.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateBookingStatus = async (id: string, newStatus: Booking['status']) => {
+    if (newStatus === 'cancelled' && !window.confirm('Cancel this booking?')) return;
+    setUpdatingId(id);
+    setError('');
+    try {
+      const response = await fetch(`/api/admin/bookings/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Could not update the booking.');
+      setBookings((prev) =>
+        prev
+          .map((b) => (b.id === id ? { ...b, status: newStatus } : b))
+          .filter((b) => filterStatus === 'all' || b.status === filterStatus)
+      );
+    } catch (updateError) {
+      setError(updateError instanceof Error ? updateError.message : 'Could not update the booking.');
+    } finally {
+      setUpdatingId(null);
+    }
+  };
 
   return (
     <AdminLayout>
@@ -30,10 +101,10 @@ export default function AdminBookingsPage() {
 
       {/* Filter Tabs */}
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-        {['all', 'confirmed', 'checked-in', 'completed', 'cancelled'].map((status) => (
+        {FILTERS.map((status) => (
           <button
             key={status}
-            onClick={() => setFilterStatus(status)}
+            onClick={() => selectFilter(status)}
             className={`px-3.5 py-1.5 rounded-xl text-xs font-bold capitalize transition ${
               filterStatus === status
                 ? 'bg-sky-500 text-slate-950 shadow-sm'
@@ -44,6 +115,10 @@ export default function AdminBookingsPage() {
           </button>
         ))}
       </div>
+
+      {error && (
+        <p role="alert" className="mb-4 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-300">{error}</p>
+      )}
 
       {/* Bookings Table */}
       <div className="bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden">
@@ -61,7 +136,12 @@ export default function AdminBookingsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">
-              {filtered.map((b) => (
+              {!loading && bookings.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="p-8 text-center text-slate-500">No bookings match this filter.</td>
+                </tr>
+              )}
+              {bookings.map((b) => (
                 <tr key={b.id} className="hover:bg-slate-900/40 transition">
                   <td className="p-4">
                     <span className="font-mono text-sky-400 font-bold block">{b.bookingReference}</span>
@@ -73,10 +153,14 @@ export default function AdminBookingsPage() {
                     <div>{b.checkIn}</div>
                     <div className="text-[11px] text-slate-500">to {b.checkOut}</div>
                   </td>
-                  <td className="p-4 text-slate-300">{b.guestsCount} Adults</td>
+                  <td className="p-4 text-slate-300">{b.guestsCount} {b.guestsCount === 1 ? 'Guest' : 'Guests'}</td>
                   <td className="p-4">
                     <div className="font-bold text-emerald-400">{formatCurrency(b.totalAmount)}</div>
-                    <span className="text-[10px] text-emerald-500 uppercase tracking-wider font-semibold">
+                    <span
+                      className={`text-[10px] uppercase tracking-wider font-semibold ${
+                        b.paymentStatus === 'paid' ? 'text-emerald-500' : b.paymentStatus === 'failed' ? 'text-rose-400' : 'text-amber-400'
+                      }`}
+                    >
                       ● {b.paymentStatus}
                     </span>
                   </td>
@@ -89,6 +173,8 @@ export default function AdminBookingsPage() {
                           ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                           : b.status === 'cancelled'
                           ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                          : b.status === 'pending'
+                          ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
                           : 'bg-slate-800 text-slate-400'
                       }`}
                     >
@@ -97,10 +183,21 @@ export default function AdminBookingsPage() {
                   </td>
                   <td className="p-4 text-right">
                     <div className="flex items-center justify-end gap-2">
+                      {b.status === 'pending' && (
+                        <button
+                          disabled={updatingId === b.id}
+                          onClick={() => updateBookingStatus(b.id, 'confirmed')}
+                          className="px-2.5 py-1.5 bg-sky-500/10 text-sky-400 hover:bg-sky-500/20 border border-sky-500/30 rounded-lg text-[11px] font-bold flex items-center gap-1 transition disabled:opacity-50"
+                        >
+                          <CheckCircle2 className="w-3 h-3" /> Confirm
+                        </button>
+                      )}
+
                       {b.status === 'confirmed' && (
                         <button
+                          disabled={updatingId === b.id}
                           onClick={() => updateBookingStatus(b.id, 'checked-in')}
-                          className="px-2.5 py-1.5 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/30 rounded-lg text-[11px] font-bold flex items-center gap-1 transition"
+                          className="px-2.5 py-1.5 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/30 rounded-lg text-[11px] font-bold flex items-center gap-1 transition disabled:opacity-50"
                         >
                           <LogIn className="w-3 h-3" /> Check In
                         </button>
@@ -108,18 +205,21 @@ export default function AdminBookingsPage() {
 
                       {b.status === 'checked-in' && (
                         <button
+                          disabled={updatingId === b.id}
                           onClick={() => updateBookingStatus(b.id, 'completed')}
-                          className="px-2.5 py-1.5 bg-sky-500/10 text-sky-400 hover:bg-sky-500/20 border border-sky-500/30 rounded-lg text-[11px] font-bold flex items-center gap-1 transition"
+                          className="px-2.5 py-1.5 bg-sky-500/10 text-sky-400 hover:bg-sky-500/20 border border-sky-500/30 rounded-lg text-[11px] font-bold flex items-center gap-1 transition disabled:opacity-50"
                         >
                           <LogOut className="w-3 h-3" /> Check Out
                         </button>
                       )}
 
-                      {b.status !== 'cancelled' && b.status !== 'completed' && (
+                      {(b.status === 'pending' || b.status === 'confirmed') && (
                         <button
+                          disabled={updatingId === b.id}
                           onClick={() => updateBookingStatus(b.id, 'cancelled')}
-                          className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition"
+                          className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition disabled:opacity-50"
                           title="Cancel Booking"
+                          aria-label="Cancel booking"
                         >
                           <XCircle className="w-4 h-4" />
                         </button>
@@ -131,6 +231,14 @@ export default function AdminBookingsPage() {
             </tbody>
           </table>
         </div>
+        {loading && <p className="p-4 text-center text-xs text-slate-500">Loading bookings…</p>}
+        {!loading && bookings.length < total && (
+          <div className="border-t border-slate-800 p-4 text-center">
+            <button onClick={loadMore} className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold text-slate-300 hover:text-white">
+              Load more ({total - bookings.length} remaining)
+            </button>
+          </div>
+        )}
       </div>
     </AdminLayout>
   );

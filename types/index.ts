@@ -27,7 +27,7 @@ export interface Booking {
   guestsCount: number;
   totalAmount: number;
   status: 'confirmed' | 'pending' | 'checked-in' | 'completed' | 'cancelled';
-  paymentStatus: 'paid' | 'pending' | 'refunded';
+  paymentStatus: 'paid' | 'pending' | 'refunded' | 'failed';
   specialRequests?: string;
   createdAt: string;
 }
@@ -52,4 +52,19 @@ export interface ServiceRequest {
   status: 'Pending' | 'Accepted' | 'In Progress' | 'Completed' | 'Cancelled';
   notes?: string;
   createdAt: string;
+}
+
+/** Staff view of a physical room, including live housekeeping status. */
+export interface AdminRoom {
+  id: string;
+  roomNumber: string;
+  floor: number;
+  name: string;
+  bedType: string;
+  sizeSqFt: number | null;
+  capacity: number;
+  pricePerNight: number;
+  status: 'available' | 'occupied' | 'cleaning' | 'maintenance';
+  image: string | null;
+  updatedAt: string | null;
 }

@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { isSupabaseAdminConfigured } from '@/lib/env';
 import { MOCK_ROOMS } from '@/lib/data/mock-data';
+import { BOOKING_SELECT, mapBookingRow, type BookingRow } from '@/lib/bookings';
 import { generateBookingReference, validateBookingInput } from '@/lib/validations/booking';
 
 const BLOCKING_STATUSES = ['confirmed', 'checked-in'];
@@ -15,14 +16,15 @@ export async function GET() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Sign in to view your bookings.' }, { status: 401 });
 
-    const { data: bookings, error } = await supabase
+    const { data, error } = await supabase
       .from('bookings')
-      .select('*, room:rooms(*, room_type:room_types(name))')
+      .select(BOOKING_SELECT)
       .eq('user_id', user.id)
       .order('check_in', { ascending: false })
       .limit(100);
 
     if (error) throw error;
+    const bookings = (data as unknown as BookingRow[]).map(mapBookingRow);
     return NextResponse.json({ bookings, source: 'supabase' });
   } catch (error) {
     console.error('Failed to load bookings:', error);

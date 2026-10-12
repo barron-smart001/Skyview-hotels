@@ -1,22 +1,74 @@
-'use client';
-
 import React from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
-import { MOCK_ROOMS, MOCK_BOOKINGS, MOCK_REQUESTS } from '@/lib/data/mock-data';
-import { formatCurrency } from '@/lib/utils';
-import { 
-  BedDouble, 
-  TrendingUp, 
-  Calendar, 
-  CheckCircle2
-} from 'lucide-react';
 import Link from 'next/link';
+import { AdminLayout } from '@/components/admin/AdminLayout';
+import { createClient } from '@/lib/supabase/server';
+import { BOOKING_SELECT, mapBookingRow, type BookingRow } from '@/lib/bookings';
+import { HOTEL } from '@/lib/hotel-config';
+import { formatCurrency } from '@/lib/utils';
+import { BedDouble, TrendingUp, Calendar, CheckCircle2 } from 'lucide-react';
 
-export default function AdminDashboardPage() {
-  const totalRooms = MOCK_ROOMS.length;
-  const availableRooms = MOCK_ROOMS.filter(r => r.available).length;
-  const activeBookings = MOCK_BOOKINGS.filter(b => b.status === 'confirmed').length;
-  const totalRevenue = MOCK_BOOKINGS.reduce((sum, b) => sum + b.totalAmount, 0);
+type ServiceRequestRow = {
+  id: string;
+  requested_time: string;
+  status: string;
+  notes: string | null;
+  service: { name: string } | { name: string }[] | null;
+};
+
+function hotelToday() {
+  // en-CA formats as YYYY-MM-DD, matching the DATE columns.
+  return new Date().toLocaleDateString('en-CA', { timeZone: 'Africa/Lagos' });
+}
+
+async function loadDashboard() {
+  const supabase = await createClient();
+  const today = hotelToday();
+  const monthStart = `${today.slice(0, 7)}-01`;
+
+  // Independent queries run in parallel; counts use head requests so no rows are transferred.
+  const [rooms, inHouse, upcoming, arrivals, revenue, recent, requests] = await Promise.all([
+    supabase.from('rooms').select('status, hotel:hotels!inner(slug)').eq('hotel.slug', HOTEL.slug),
+    supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('status', 'checked-in'),
+    supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('status', 'confirmed').gte('check_out', today),
+    supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('status', 'confirmed').eq('check_in', today),
+    supabase.from('payments').select('amount_ngn').eq('status', 'success').gte('paid_at', monthStart),
+    supabase.from('bookings').select(BOOKING_SELECT).order('created_at', { ascending: false }).limit(8),
+    supabase
+      .from('service_requests')
+      .select('id, requested_time, status, notes, service:services(name)')
+      .in('status', ['Pending', 'Accepted', 'In Progress'])
+      .order('created_at', { ascending: false })
+      .limit(6),
+  ]);
+
+  const roomRows = rooms.data ?? [];
+  const totalRooms = roomRows.length;
+  const checkedIn = inHouse.count ?? 0;
+
+  return {
+    totalRooms,
+    availableRooms: roomRows.filter((room) => room.status === 'available').length,
+    occupancy: totalRooms ? (checkedIn / totalRooms) * 100 : 0,
+    checkedIn,
+    activeBookings: (upcoming.count ?? 0) + checkedIn,
+    arrivalsToday: arrivals.count ?? 0,
+    monthRevenue: (revenue.data ?? []).reduce((sum, payment) => sum + Number(payment.amount_ngn), 0),
+    recentBookings: ((recent.data ?? []) as unknown as BookingRow[]).map(mapBookingRow),
+    serviceRequests: (requests.data ?? []) as unknown as ServiceRequestRow[],
+    loadFailed: [rooms, recent].some((result) => result.error),
+  };
+}
+
+const STATUS_STYLES: Record<string, string> = {
+  pending: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+  confirmed: 'bg-sky-500/10 text-sky-400 border-sky-500/20',
+  'checked-in': 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+  completed: 'bg-slate-800 text-slate-400 border-slate-700',
+  cancelled: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+};
+
+export default async function AdminDashboardPage() {
+  const stats = await loadDashboard();
 
   return (
     <AdminLayout>
@@ -24,12 +76,17 @@ export default function AdminDashboardPage() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-extrabold text-white tracking-tight">Property Operations Dashboard</h1>
-            <p className="text-xs text-slate-400 mt-0.5">Real-time status overview of rooms, occupancy, arrivals, and revenue.</p>
+            <p className="text-xs text-slate-400 mt-0.5">Live status overview of rooms, occupancy, arrivals, and revenue.</p>
           </div>
           <span className="text-xs text-slate-400 bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700">
-            Hotel: <strong className="text-white">Skyview Grand Uyo</strong>
+            Hotel: <strong className="text-white">{HOTEL.name}</strong>
           </span>
         </div>
+        {stats.loadFailed && (
+          <p role="alert" className="mt-4 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-300">
+            Some dashboard data could not be loaded. Figures may be incomplete.
+          </p>
+        )}
       </div>
 
       {/* Metrics Grid */}
@@ -37,10 +94,8 @@ export default function AdminDashboardPage() {
         <div className="bg-slate-950 p-5 rounded-2xl border border-slate-800 flex items-center justify-between">
           <div>
             <span className="text-xs text-slate-400 font-medium">Occupancy Rate</span>
-            <div className="text-2xl font-extrabold text-white mt-1">78.4%</div>
-            <span className="text-[11px] text-emerald-400 flex items-center gap-1 mt-1">
-              <TrendingUp className="w-3 h-3" /> +4.2% vs last week
-            </span>
+            <div className="text-2xl font-extrabold text-white mt-1">{stats.occupancy.toFixed(1)}%</div>
+            <span className="text-[11px] text-slate-400 mt-1 block">{stats.checkedIn} guests in house</span>
           </div>
           <div className="w-11 h-11 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center">
             <BedDouble className="w-5 h-5" />
@@ -50,7 +105,7 @@ export default function AdminDashboardPage() {
         <div className="bg-slate-950 p-5 rounded-2xl border border-slate-800 flex items-center justify-between">
           <div>
             <span className="text-xs text-slate-400 font-medium">Available Suites</span>
-            <div className="text-2xl font-extrabold text-white mt-1">{availableRooms} / {totalRooms}</div>
+            <div className="text-2xl font-extrabold text-white mt-1">{stats.availableRooms} / {stats.totalRooms}</div>
             <span className="text-[11px] text-sky-400 mt-1 block">Ready for check-in</span>
           </div>
           <div className="w-11 h-11 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
@@ -61,8 +116,10 @@ export default function AdminDashboardPage() {
         <div className="bg-slate-950 p-5 rounded-2xl border border-slate-800 flex items-center justify-between">
           <div>
             <span className="text-xs text-slate-400 font-medium">Active Reservations</span>
-            <div className="text-2xl font-extrabold text-white mt-1">{activeBookings} Stays</div>
-            <span className="text-[11px] text-slate-400 mt-1 block">2 Arrivals scheduled today</span>
+            <div className="text-2xl font-extrabold text-white mt-1">{stats.activeBookings} Stays</div>
+            <span className="text-[11px] text-slate-400 mt-1 block">
+              {stats.arrivalsToday} {stats.arrivalsToday === 1 ? 'arrival' : 'arrivals'} scheduled today
+            </span>
           </div>
           <div className="w-11 h-11 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center">
             <Calendar className="w-5 h-5" />
@@ -72,10 +129,8 @@ export default function AdminDashboardPage() {
         <div className="bg-slate-950 p-5 rounded-2xl border border-slate-800 flex items-center justify-between">
           <div>
             <span className="text-xs text-slate-400 font-medium">Month Revenue</span>
-            <div className="text-2xl font-extrabold text-white mt-1">{formatCurrency(totalRevenue)}</div>
-            <span className="text-[11px] text-emerald-400 flex items-center gap-1 mt-1">
-              <TrendingUp className="w-3 h-3" /> 100% verified via Paystack
-            </span>
+            <div className="text-2xl font-extrabold text-white mt-1">{formatCurrency(stats.monthRevenue)}</div>
+            <span className="text-[11px] text-emerald-400 mt-1 block">Verified Paystack payments</span>
           </div>
           <div className="w-11 h-11 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
             <TrendingUp className="w-5 h-5" />
@@ -85,73 +140,81 @@ export default function AdminDashboardPage() {
 
       {/* Main operational tables */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        {/* Left 2 Cols: Live Today Arrivals & Bookings */}
         <div className="lg:col-span-2 bg-slate-950 rounded-2xl border border-slate-800 p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-bold text-white">Live Guest Reservations & Stays</h3>
+            <h3 className="text-sm font-bold text-white">Latest Guest Reservations</h3>
             <Link href="/admin/bookings" className="text-xs text-sky-400 hover:text-sky-300">
               Manage all bookings
             </Link>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="text-slate-400 border-b border-slate-800 pb-2 font-semibold">
-                  <th className="pb-3">Reference</th>
-                  <th className="pb-3">Guest Name</th>
-                  <th className="pb-3">Suite</th>
-                  <th className="pb-3">Dates</th>
-                  <th className="pb-3">Folio Total</th>
-                  <th className="pb-3">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-800/60">
-                {MOCK_BOOKINGS.map((b) => (
-                  <tr key={b.id} className="hover:bg-slate-900/50 transition">
-                    <td className="py-3 font-mono text-sky-400 font-bold">{b.bookingReference}</td>
-                    <td className="py-3 text-white font-medium">{b.guestName}</td>
-                    <td className="py-3 text-slate-300">{b.room.name}</td>
-                    <td className="py-3 text-slate-400">{b.checkIn} → {b.checkOut}</td>
-                    <td className="py-3 text-emerald-400 font-bold">{formatCurrency(b.totalAmount)}</td>
-                    <td className="py-3">
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 capitalize">
-                        {b.status}
-                      </span>
-                    </td>
+          {stats.recentBookings.length === 0 ? (
+            <p className="py-8 text-center text-xs text-slate-500">No reservations yet.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="text-slate-400 border-b border-slate-800 pb-2 font-semibold">
+                    <th className="pb-3">Reference</th>
+                    <th className="pb-3">Guest Name</th>
+                    <th className="pb-3">Suite</th>
+                    <th className="pb-3">Dates</th>
+                    <th className="pb-3">Folio Total</th>
+                    <th className="pb-3">Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60">
+                  {stats.recentBookings.map((b) => (
+                    <tr key={b.id} className="hover:bg-slate-900/50 transition">
+                      <td className="py-3 font-mono text-sky-400 font-bold">{b.bookingReference}</td>
+                      <td className="py-3 text-white font-medium">{b.guestName}</td>
+                      <td className="py-3 text-slate-300">{b.room.name}</td>
+                      <td className="py-3 text-slate-400">{b.checkIn} → {b.checkOut}</td>
+                      <td className="py-3 text-emerald-400 font-bold">{formatCurrency(b.totalAmount)}</td>
+                      <td className="py-3">
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border capitalize ${STATUS_STYLES[b.status]}`}>
+                          {b.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
 
-        {/* Right 1 Col: Urgent Concierge & Service Dispatches */}
         <div className="bg-slate-950 rounded-2xl border border-slate-800 p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-bold text-white">Service Requests Dispatch</h3>
             <span className="text-[10px] text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-md border border-amber-400/20">
-              2 Pending
+              {stats.serviceRequests.filter((req) => req.status === 'Pending').length} Pending
             </span>
           </div>
 
           <div className="space-y-3">
-            {MOCK_REQUESTS.map((req) => (
-              <div key={req.id} className="p-3 bg-slate-900 rounded-xl border border-slate-800">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-bold text-white truncate">{req.serviceName}</span>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400">
-                    {req.status}
-                  </span>
+            {stats.serviceRequests.length === 0 && (
+              <p className="py-6 text-center text-xs text-slate-500">No open service requests.</p>
+            )}
+            {stats.serviceRequests.map((req) => {
+              const service = Array.isArray(req.service) ? req.service[0] : req.service;
+              return (
+                <div key={req.id} className="p-3 bg-slate-900 rounded-xl border border-slate-800">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-bold text-white truncate">{service?.name ?? 'Service'}</span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400">
+                      {req.status}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mb-2">Timing: {req.requested_time}</p>
+                  {req.notes && (
+                    <p className="text-[11px] text-amber-300/80 bg-slate-950 p-2 rounded-lg border border-slate-800/80">
+                      Note: {req.notes}
+                    </p>
+                  )}
                 </div>
-                <p className="text-[11px] text-slate-400 mb-2">Timing: {req.requestedTime}</p>
-                {req.notes && (
-                  <p className="text-[11px] text-amber-300/80 bg-slate-950 p-2 rounded-lg border border-slate-800/80">
-                    Note: {req.notes}
-                  </p>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>

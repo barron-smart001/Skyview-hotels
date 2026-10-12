@@ -1,36 +1,25 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
-import { CheckCircle2, Clock, AlertTriangle, RefreshCw } from 'lucide-react';
+import { useAdminRooms } from '@/components/admin/useAdminRooms';
+import type { AdminRoom } from '@/types';
+import { BedDouble, CheckCircle2, Clock, AlertTriangle } from 'lucide-react';
 
-type HousekeepingStatus = 'Clean & Ready' | 'Needs Cleaning' | 'In Progress' | 'Maintenance';
-
-interface RoomHousekeeping {
-  id: string;
-  roomNumber: string;
-  name: string;
-  floor: number;
-  status: HousekeepingStatus;
-  lastInspected: string;
-}
-
-const INITIAL_HOUSEKEEPING: RoomHousekeeping[] = [
-  { id: '101', roomNumber: 'RM 101', name: 'Skyline Presidential Suite', floor: 10, status: 'Clean & Ready', lastInspected: '10:30 AM' },
-  { id: '201', roomNumber: 'RM 201', name: 'Executive Panorama Suite', floor: 8, status: 'In Progress', lastInspected: '11:15 AM' },
-  { id: '305', roomNumber: 'RM 305', name: 'Deluxe Garden View Room', floor: 4, status: 'Needs Cleaning', lastInspected: 'Guest checkout 09:00 AM' },
-  { id: '402', roomNumber: 'RM 402', name: 'Standard City Comfort', floor: 2, status: 'Clean & Ready', lastInspected: 'Yesterday' },
-  { id: '508', roomNumber: 'RM 508', name: 'Signature Family Haven', floor: 5, status: 'Maintenance', lastInspected: 'HVAC Filter check' },
+const COLUMNS: { status: AdminRoom['status']; title: string; icon: React.ReactNode }[] = [
+  { status: 'available', title: 'Clean & Ready', icon: <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> },
+  { status: 'cleaning', title: 'Needs Cleaning', icon: <Clock className="w-3.5 h-3.5 text-amber-400" /> },
+  { status: 'occupied', title: 'Occupied', icon: <BedDouble className="w-3.5 h-3.5 text-sky-400" /> },
+  { status: 'maintenance', title: 'Maintenance', icon: <AlertTriangle className="w-3.5 h-3.5 text-rose-400" /> },
 ];
 
-export default function AdminHousekeepingPage() {
-  const [rooms, setRooms] = useState<RoomHousekeeping[]>(INITIAL_HOUSEKEEPING);
+function formatUpdated(value: string | null) {
+  if (!value) return 'Not recorded';
+  return new Date(value).toLocaleString('en-NG', { dateStyle: 'medium', timeStyle: 'short' });
+}
 
-  const setStatus = (id: string, newStatus: HousekeepingStatus) => {
-    setRooms(prev =>
-      prev.map(r => (r.id === id ? { ...r, status: newStatus, lastInspected: 'Just now' } : r))
-    );
-  };
+export default function AdminHousekeepingPage() {
+  const { rooms, loading, error, updatingId, setStatus } = useAdminRooms();
 
   return (
     <AdminLayout>
@@ -39,19 +28,21 @@ export default function AdminHousekeepingPage() {
         <p className="text-xs text-slate-400 mt-0.5">Live turn-down tracking, housekeeping dispatch, and maintenance inspections.</p>
       </div>
 
+      {error && (
+        <p role="alert" className="mb-4 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-300">{error}</p>
+      )}
+      {loading && <p className="mb-4 text-xs text-slate-500">Loading rooms…</p>}
+
       {/* Housekeeping Columns / Kanban */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {(['Clean & Ready', 'Needs Cleaning', 'In Progress', 'Maintenance'] as HousekeepingStatus[]).map((col) => {
-          const matching = rooms.filter(r => r.status === col);
+        {COLUMNS.map((col) => {
+          const matching = rooms.filter(r => r.status === col.status);
           return (
-            <div key={col} className="bg-slate-950 rounded-2xl border border-slate-800 p-4 flex flex-col">
+            <div key={col.status} className="bg-slate-950 rounded-2xl border border-slate-800 p-4 flex flex-col">
               <div className="flex items-center justify-between mb-4 pb-2 border-b border-slate-800">
                 <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                  {col === 'Clean & Ready' && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />}
-                  {col === 'Needs Cleaning' && <Clock className="w-3.5 h-3.5 text-amber-400" />}
-                  {col === 'In Progress' && <RefreshCw className="w-3.5 h-3.5 text-sky-400 animate-spin" />}
-                  {col === 'Maintenance' && <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />}
-                  {col}
+                  {col.icon}
+                  {col.title}
                 </span>
                 <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-slate-900 text-slate-300">
                   {matching.length}
@@ -63,38 +54,41 @@ export default function AdminHousekeepingPage() {
                   <div key={r.id} className="bg-slate-900 rounded-xl p-3.5 border border-slate-800/90 shadow-sm space-y-2">
                     <div className="flex justify-between items-start">
                       <div>
-                        <span className="font-mono text-xs font-bold text-sky-400">{r.roomNumber}</span>
+                        <span className="font-mono text-xs font-bold text-sky-400">RM {r.roomNumber}</span>
                         <h4 className="text-xs font-bold text-white truncate">{r.name}</h4>
                       </div>
                       <span className="text-[10px] text-slate-500">Floor {r.floor}</span>
                     </div>
 
-                    <p className="text-[11px] text-slate-400">Inspected: {r.lastInspected}</p>
+                    <p className="text-[11px] text-slate-400">Updated: {formatUpdated(r.updatedAt)}</p>
 
                     {/* Quick Move Action */}
                     <div className="pt-2 border-t border-slate-800 flex justify-between gap-1">
-                      {col !== 'Clean & Ready' && (
+                      {(col.status === 'cleaning' || col.status === 'maintenance') && (
                         <button
-                          onClick={() => setStatus(r.id, 'Clean & Ready')}
-                          className="w-full py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded-lg border border-emerald-500/20"
+                          disabled={updatingId === r.id}
+                          onClick={() => setStatus(r.id, 'available')}
+                          className="w-full py-1 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 text-[10px] font-bold rounded-lg border border-emerald-500/20 disabled:opacity-50"
                         >
                           Mark Clean
                         </button>
                       )}
-                      {col !== 'In Progress' && col !== 'Clean & Ready' && (
+                      {(col.status === 'available' || col.status === 'occupied') && (
                         <button
-                          onClick={() => setStatus(r.id, 'In Progress')}
-                          className="w-full py-1 bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 text-[10px] font-bold rounded-lg border border-sky-500/20"
-                        >
-                          Dispatch Staff
-                        </button>
-                      )}
-                      {col === 'Clean & Ready' && (
-                        <button
-                          onClick={() => setStatus(r.id, 'Needs Cleaning')}
-                          className="w-full py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-[10px] font-bold rounded-lg border border-amber-500/20"
+                          disabled={updatingId === r.id}
+                          onClick={() => setStatus(r.id, 'cleaning')}
+                          className="w-full py-1 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-[10px] font-bold rounded-lg border border-amber-500/20 disabled:opacity-50"
                         >
                           Request Clean
+                        </button>
+                      )}
+                      {col.status !== 'maintenance' && (
+                        <button
+                          disabled={updatingId === r.id}
+                          onClick={() => setStatus(r.id, 'maintenance')}
+                          className="w-full py-1 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-[10px] font-bold rounded-lg border border-rose-500/20 disabled:opacity-50"
+                        >
+                          Report Issue
                         </button>
                       )}
                     </div>

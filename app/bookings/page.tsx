@@ -1,15 +1,39 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { MOCK_BOOKINGS } from '@/lib/data/mock-data';
+import type { Booking } from '@/types';
 import { formatCurrency } from '@/lib/utils';
+import { HOTEL } from '@/lib/hotel-config';
 import { Calendar, MapPin, CheckCircle2, Clock, Ban, Sparkles, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
 
+type LoadState = 'loading' | 'ready' | 'signed-out' | 'error';
+
 export default function BookingsPage() {
   const [tab, setTab] = useState<'all' | 'upcoming' | 'completed'>('all');
-  const [bookings, setBookings] = useState(MOCK_BOOKINGS);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [loadState, setLoadState] = useState<LoadState>('loading');
+  const [error, setError] = useState('');
+  const [cancellingId, setCancellingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch('/api/bookings', { signal: controller.signal })
+      .then(async (response) => {
+        if (response.status === 401) return setLoadState('signed-out');
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Your bookings could not be loaded.');
+        setBookings(result.bookings);
+        setLoadState('ready');
+      })
+      .catch((loadError: unknown) => {
+        if (loadError instanceof Error && loadError.name === 'AbortError') return;
+        setError(loadError instanceof Error ? loadError.message : 'Your bookings could not be loaded.');
+        setLoadState('error');
+      });
+    return () => controller.abort();
+  }, []);
 
   const filteredBookings = bookings.filter((b) => {
     if (tab === 'upcoming') return b.status === 'confirmed' || b.status === 'pending';
@@ -17,10 +41,20 @@ export default function BookingsPage() {
     return true;
   });
 
-  const handleCancelBooking = (id: string) => {
-    setBookings((prev) =>
-      prev.map((b) => (b.id === id ? { ...b, status: 'cancelled' as const } : b))
-    );
+  const handleCancelBooking = async (id: string) => {
+    if (!window.confirm('Cancel this booking? Refunds for paid stays are handled by reservations.')) return;
+    setCancellingId(id);
+    setError('');
+    try {
+      const response = await fetch(`/api/bookings/${id}/cancel`, { method: 'POST' });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'We could not cancel this booking.');
+      setBookings((prev) => prev.map((b) => (b.id === id ? { ...b, status: 'cancelled' as const } : b)));
+    } catch (cancelError) {
+      setError(cancelError instanceof Error ? cancelError.message : 'We could not cancel this booking.');
+    } finally {
+      setCancellingId(null);
+    }
   };
 
   return (
@@ -67,6 +101,27 @@ export default function BookingsPage() {
         ))}
       </div>
 
+      {error && (
+        <p role="alert" className="mb-4 rounded-xl bg-rose-50 p-3 text-xs font-semibold text-rose-700">{error}</p>
+      )}
+
+      {loadState === 'loading' && <p className="py-10 text-center text-sm text-slate-500">Loading your bookings…</p>}
+
+      {loadState === 'signed-out' && (
+        <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center">
+          <p className="text-sm text-slate-600">Sign in to see the stays booked with your account.</p>
+          <Link href="/sign-in" className="mt-4 inline-block rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
+            Sign in
+          </Link>
+        </div>
+      )}
+
+      {loadState === 'ready' && filteredBookings.length === 0 && (
+        <p className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">
+          {bookings.length === 0 ? 'You have no bookings yet.' : 'No bookings in this view.'}
+        </p>
+      )}
+
       {/* Booking list */}
       <div className="space-y-4">
         {filteredBookings.map((b) => (
@@ -75,11 +130,15 @@ export default function BookingsPage() {
             className="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-sm hover:shadow-md transition flex flex-col md:flex-row gap-6 items-start md:items-center justify-between"
           >
             <div className="flex flex-col sm:flex-row gap-5 items-start sm:items-center">
-              <img
-                src={b.room.images[0]}
-                alt={b.room.name}
-                className="w-full sm:w-36 h-28 rounded-xl object-cover"
-              />
+              {b.room.images[0] ? (
+                <img
+                  src={b.room.images[0]}
+                  alt={b.room.name}
+                  className="w-full sm:w-36 h-28 rounded-xl object-cover"
+                />
+              ) : (
+                <div className="w-full sm:w-36 h-28 rounded-xl bg-slate-100" />
+              )}
               <div>
                 <div className="flex items-center gap-2 mb-1.5">
                   <span className="text-xs font-mono font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded-md">
@@ -107,7 +166,7 @@ export default function BookingsPage() {
 
                 <h3 className="text-base font-bold text-slate-900">{b.room.name}</h3>
                 <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
-                  <MapPin className="w-3.5 h-3.5 text-slate-400" /> Skyview Uyo • {b.guestsCount} Guests
+                  <MapPin className="w-3.5 h-3.5 text-slate-400" /> {HOTEL.name} • {b.guestsCount} {b.guestsCount === 1 ? 'Guest' : 'Guests'}
                 </p>
                 <p className="text-xs text-slate-600 flex items-center gap-1.5 mt-2 font-medium">
                   <Calendar className="w-3.5 h-3.5 text-sky-600" /> {b.checkIn} to {b.checkOut}
@@ -117,17 +176,18 @@ export default function BookingsPage() {
 
             <div className="w-full md:w-auto flex md:flex-col items-center md:items-end justify-between border-t md:border-t-0 pt-4 md:pt-0 border-slate-100 gap-3">
               <div className="text-left md:text-right">
-                <span className="text-[11px] text-slate-400 block font-medium">Total Paid</span>
+                <span className="text-[11px] text-slate-400 block font-medium">{b.paymentStatus === 'paid' ? 'Total Paid' : 'Total Due'}</span>
                 <span className="text-base sm:text-lg font-extrabold text-slate-900">
                   {formatCurrency(b.totalAmount)}
                 </span>
               </div>
 
               <div className="flex items-center gap-2">
-                {b.status === 'confirmed' && (
+                {(b.status === 'confirmed' || b.status === 'pending') && (
                   <button
+                    disabled={cancellingId === b.id}
                     onClick={() => handleCancelBooking(b.id)}
-                    className="px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-xl transition"
+                    className="px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-xl transition disabled:opacity-50"
                   >
                     Cancel
                   </button>
