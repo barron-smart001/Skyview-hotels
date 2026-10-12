@@ -2,8 +2,7 @@
 
 import React, { useState } from 'react';
 import { AdminLayout } from '@/components/admin/AdminLayout';
-import { MOCK_ROOMS } from '@/lib/data/mock-data';
-import { Brush, CheckCircle2, Clock, AlertTriangle, Sparkles, RefreshCw } from 'lucide-react';
+import { CheckCircle2, Clock, AlertTriangle, RefreshCw } from 'lucide-react';
 
 type HousekeepingStatus = 'Clean & Ready' | 'Needs Cleaning' | 'In Progress' | 'Maintenance';
 

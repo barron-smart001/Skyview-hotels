@@ -5,7 +5,7 @@ import { AdminLayout } from '@/components/admin/AdminLayout';
 import { MOCK_BOOKINGS } from '@/lib/data/mock-data';
 import { Booking } from '@/types';
 import { formatCurrency } from '@/lib/utils';
-import { Calendar, User, Search, Filter, CheckCircle2, LogIn, LogOut, XCircle } from 'lucide-react';
+import { LogIn, LogOut, XCircle } from 'lucide-react';
 
 export default function AdminBookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>(MOCK_BOOKINGS);

@@ -5,7 +5,7 @@ import { AdminLayout } from '@/components/admin/AdminLayout';
 import { MOCK_ROOMS } from '@/lib/data/mock-data';
 import { Room } from '@/types';
 import { formatCurrency } from '@/lib/utils';
-import { BedDouble, Plus, Search, Filter, CheckCircle2, AlertCircle, Edit, Trash2 } from 'lucide-react';
+import { Plus, Search, CheckCircle2, AlertCircle, Edit, Trash2 } from 'lucide-react';
 
 export default function AdminRoomsPage() {
   const [rooms, setRooms] = useState<Room[]>(MOCK_ROOMS);

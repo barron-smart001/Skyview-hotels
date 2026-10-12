@@ -8,7 +8,7 @@ import { useRoomCatalog } from '@/components/rooms/useRoomCatalog';
 import { Room } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 import { HOTEL } from '@/lib/hotel-config';
-import { Filter, SlidersHorizontal, BedDouble, Search, Sparkles } from 'lucide-react';
+import { Filter, BedDouble, Search, Sparkles } from 'lucide-react';
 
 export default function RoomsPage() {
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);

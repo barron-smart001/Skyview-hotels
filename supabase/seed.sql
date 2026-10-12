@@ -30,3 +30,20 @@ VALUES
   ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Gourmet Champagne Breakfast', 'Room Service', 25000.00, 'Fresh on demand', 'Poached eggs, artisan brioche, and champagne.', 'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=80', true),
   ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Ibom Heritage City Tour', 'Tours & Experiences', 45000.00, '3 hours', 'Guided Uyo landmarks, artisan stops, and local refreshments.', 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80', false)
 ON CONFLICT DO NOTHING;
+
+-- 4. Create Room Inventory (requires migration 003 for the (hotel_id, room_number) key)
+INSERT INTO public.rooms (hotel_id, room_type_id, room_number, floor, price_per_night_ngn, capacity, status, is_featured, images, amenities)
+VALUES
+  ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'b0eebc99-9c0b-4ef8-bb6d-6bb9bd380001', '801', 8, 280000.00, 4, 'available', true,
+    ARRAY['https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200&q=80'],
+    ARRAY['Free High-Speed Wi-Fi', 'Private Jacuzzi', 'Skyline Balcony', 'Butler Service', 'Complimentary Breakfast']),
+  ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'b0eebc99-9c0b-4ef8-bb6d-6bb9bd380002', '601', 6, 165000.00, 2, 'available', true,
+    ARRAY['https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=1200&q=80'],
+    ARRAY['High-Speed Wi-Fi', 'Workstation & Ergonomic Chair', 'Espresso Machine', 'Private Balcony', 'Rain Shower']),
+  ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'b0eebc99-9c0b-4ef8-bb6d-6bb9bd380003', '301', 3, 95000.00, 2, 'available', true,
+    ARRAY['https://images.unsplash.com/photo-1595576508898-0ad5c879a061?auto=format&fit=crop&w=1200&q=80'],
+    ARRAY['Free Wi-Fi', 'Garden Balcony', 'Smart 4K TV', 'Breakfast Included', 'Air Conditioning']),
+  ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'b0eebc99-9c0b-4ef8-bb6d-6bb9bd380004', '201', 2, 65000.00, 2, 'available', false,
+    ARRAY['https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=1200&q=80'],
+    ARRAY['Free Wi-Fi', 'Smart Climate Control', 'Work Desk', 'Air Conditioning'])
+ON CONFLICT (hotel_id, room_number) DO NOTHING;

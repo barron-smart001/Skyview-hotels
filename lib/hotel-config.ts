@@ -4,7 +4,8 @@
  */
 export const HOTEL = {
   name: 'Skyview Hotel',
-  slug: 'sultan-hotel-uyo',
+  // Must match public.hotels.slug in Supabase (see supabase/seed.sql).
+  slug: 'skyview-uyo',
   location: 'Location to be confirmed',
   demoNotice: 'Demonstration website — hotel details, imagery, room categories and rates require owner approval.',
   contactPhone: '',

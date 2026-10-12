@@ -1,4 +1,7 @@
-import { createClient } from '@/lib/supabase/server';
+import { cache } from 'react';
+import { unstable_cache } from 'next/cache';
+import { createPublicClient } from '@/lib/supabase/admin';
+import { isSupabaseConfigured } from '@/lib/env';
 import { HOTEL } from '@/lib/hotel-config';
 import { MOCK_ROOMS } from '@/lib/data/mock-data';
 import type { Room } from '@/types';
@@ -47,29 +50,36 @@ function mapRoomRecord(record: RoomRecord): Room {
   };
 }
 
-export async function getRoomCatalog(): Promise<{ rooms: Room[]; source: 'supabase' | 'fallback' }> {
+type RoomCatalog = { rooms: Room[]; source: 'supabase' | 'fallback' };
+
+export const ROOMS_CACHE_TAG = 'rooms';
+
+async function loadRoomCatalog(): Promise<RoomCatalog> {
+  if (!isSupabaseConfigured()) return { rooms: MOCK_ROOMS, source: 'fallback' };
+
   try {
-    const supabase = await createClient();
-    const { data: hotel, error: hotelError } = await supabase
-      .from('hotels')
-      .select('id')
-      .eq('slug', HOTEL.slug)
-      .maybeSingle();
-
-    if (hotelError || !hotel) return { rooms: MOCK_ROOMS, source: 'fallback' };
-
-    const { data: inventory, error: inventoryError } = await supabase
+    // A single query with an inner join replaces the previous hotel lookup + rooms lookup round trips.
+    const { data: inventory, error } = await createPublicClient()
       .from('rooms')
-      .select('id, room_number, price_per_night_ngn, capacity, status, is_featured, images, amenities, room_type:room_types(name, slug, size_sqft, bed_type, description)')
-      .eq('hotel_id', hotel.id)
+      .select('id, room_number, price_per_night_ngn, capacity, status, is_featured, images, amenities, hotel:hotels!inner(slug), room_type:room_types(name, slug, size_sqft, bed_type, description)')
+      .eq('hotel.slug', HOTEL.slug)
       .order('price_per_night_ngn', { ascending: true });
 
-    if (inventoryError || !inventory?.length) return { rooms: MOCK_ROOMS, source: 'fallback' };
+    if (error || !inventory?.length) return { rooms: MOCK_ROOMS, source: 'fallback' };
     return { rooms: (inventory as unknown as RoomRecord[]).map(mapRoomRecord), source: 'supabase' };
   } catch {
     return { rooms: MOCK_ROOMS, source: 'fallback' };
   }
 }
+
+/**
+ * Room inventory changes rarely, so it is cached across requests and refreshed
+ * every 5 minutes (or immediately via revalidateTag(ROOMS_CACHE_TAG)).
+ * React's cache() additionally dedupes calls within a single render.
+ */
+export const getRoomCatalog = cache(
+  unstable_cache(loadRoomCatalog, ['room-catalog', HOTEL.slug], { revalidate: 300, tags: [ROOMS_CACHE_TAG] })
+);
 
 export async function getRoomById(id: string): Promise<Room | undefined> {
   const { rooms } = await getRoomCatalog();

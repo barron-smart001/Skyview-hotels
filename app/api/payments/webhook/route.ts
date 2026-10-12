@@ -1,55 +1,51 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { createClient } from '@/lib/supabase/server';
+import { getPaystackSecret } from '@/lib/env';
+import { recordSuccessfulPayment } from '@/lib/payments';
+
+function isValidSignature(rawBody: string, signature: string | null, secret: string) {
+  if (!signature) return false;
+  const expected = Buffer.from(crypto.createHmac('sha512', secret).update(rawBody).digest('hex'));
+  const received = Buffer.from(signature);
+  return expected.length === received.length && crypto.timingSafeEqual(expected, received);
+}
 
 export async function POST(request: Request) {
-  try {
-    const rawBody = await request.text();
-    const signature = request.headers.get('x-paystack-signature');
-    const secret = process.env.PAYSTACK_SECRET_KEY;
-
-    // Verify webhook signature
-    if (secret && signature) {
-      const hash = crypto.createHmac('sha512', secret).update(rawBody).digest('hex');
-      if (hash !== signature) {
-        return NextResponse.json({ error: 'Invalid webhook signature' }, { status: 401 });
-      }
-    }
-
-    const event = JSON.parse(rawBody);
-
-    if (event.event === 'charge.success') {
-      const { reference, amount, channel } = event.data;
-      const amountInNaira = amount / 100;
-
-      try {
-        const supabase = await createClient();
-        
-        // Record payment
-        await supabase.from('payments').insert([
-          {
-            paystack_reference: reference,
-            amount_ngn: amountInNaira,
-            channel: channel || 'card',
-            currency: 'NGN',
-            status: 'success',
-            paid_at: new Date().toISOString(),
-          }
-        ]);
-
-        // Update corresponding booking
-        await supabase
-          .from('bookings')
-          .update({ payment_status: 'paid', status: 'confirmed' })
-          .eq('booking_reference', reference);
-      } catch (dbErr) {
-        console.error('Database update error on webhook:', dbErr);
-      }
-    }
-
-    return NextResponse.json({ received: true }, { status: 200 });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Webhook handler failed';
-    return NextResponse.json({ error: message }, { status: 500 });
+  const secret = getPaystackSecret();
+  if (!secret) {
+    return NextResponse.json({ error: 'Webhook not configured' }, { status: 503 });
   }
+
+  const rawBody = await request.text();
+  // Unsigned or mis-signed requests are rejected; previously a missing header skipped verification.
+  if (!isValidSignature(rawBody, request.headers.get('x-paystack-signature'), secret)) {
+    return NextResponse.json({ error: 'Invalid webhook signature' }, { status: 401 });
+  }
+
+  let event: { event?: string; data?: { reference?: string; amount?: number; channel?: string; paid_at?: string } };
+  try {
+    event = JSON.parse(rawBody);
+  } catch {
+    return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
+  }
+
+  if (event.event === 'charge.success' && event.data?.reference && typeof event.data.amount === 'number') {
+    try {
+      const outcome = await recordSuccessfulPayment({
+        reference: event.data.reference,
+        amountKobo: event.data.amount,
+        channel: event.data.channel,
+        paidAt: event.data.paid_at,
+      });
+      if (outcome !== 'confirmed' && outcome !== 'already-processed') {
+        console.warn(`Webhook for ${event.data.reference}: ${outcome}`);
+      }
+    } catch (error) {
+      // Non-2xx makes Paystack retry, so transient database errors are not lost.
+      console.error('Database update error on webhook:', error);
+      return NextResponse.json({ error: 'Temporary processing failure' }, { status: 500 });
+    }
+  }
+
+  return NextResponse.json({ received: true }, { status: 200 });
 }

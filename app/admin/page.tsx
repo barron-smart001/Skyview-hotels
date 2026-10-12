@@ -5,16 +5,10 @@ import { AdminLayout } from '@/components/admin/AdminLayout';
 import { MOCK_ROOMS, MOCK_BOOKINGS, MOCK_REQUESTS } from '@/lib/data/mock-data';
 import { formatCurrency } from '@/lib/utils';
 import { 
-  Users, 
   BedDouble, 
   TrendingUp, 
   Calendar, 
-  CheckCircle2, 
-  Clock, 
-  AlertCircle,
-  Sparkles,
-  ArrowUpRight,
-  ShieldCheck
+  CheckCircle2
 } from 'lucide-react';
 import Link from 'next/link';
 

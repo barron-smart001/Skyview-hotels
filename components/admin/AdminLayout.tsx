@@ -8,14 +8,9 @@ import {
   LayoutDashboard, 
   BedDouble, 
   CalendarCheck2, 
-  Sparkles, 
   Brush, 
-  LogOut, 
-  Search, 
-  Bell, 
   ArrowLeft,
-  ChevronRight,
-  ShieldAlert
+  ChevronRight
 } from 'lucide-react';
 
 const ADMIN_NAV = [
