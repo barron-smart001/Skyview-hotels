@@ -8,6 +8,7 @@ import {
   AirVent, ArrowRight, BedDouble, Car, Cast, ChevronRight, Coffee, Clock3, MapPin, Router, ShieldCheck,
   Sparkles, Star, Wifi,
 } from 'lucide-react';
+import { ScrollText } from '@/components/ui/ScrollText';
 import { SiteHeader } from '@/components/layout/SiteHeader';
 import { ContactSection } from '@/components/contact/ContactSection';
 import { BookingModal } from '@/components/rooms/BookingModal';
@@ -95,8 +96,8 @@ export default function Home() {
       <section id="facilities" className="mx-auto max-w-7xl px-5 py-20 sm:px-8 lg:px-10">
         <motion.div {...reveal} className="max-w-2xl">
           <p className="text-xs font-bold uppercase tracking-[0.22em] text-amber-700">Facilities</p>
-          <h2 className="mt-3 font-serif text-4xl sm:text-5xl">Thoughtful spaces for every kind of stay.</h2>
-          <p className="mt-5 text-sm leading-relaxed text-stone-600">The following is demonstration content based on the facilities identified for this concept. Final descriptions should be approved by the hotel.</p>
+          <ScrollText as="h2" className="mt-3 font-serif text-4xl sm:text-5xl" text="Thoughtful spaces for every kind of stay." />
+          <ScrollText className="mt-5 text-sm leading-relaxed text-stone-600" text="The following is demonstration content based on the facilities identified for this concept. Final descriptions should be approved by the hotel." />
         </motion.div>
         <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {FACILITIES.map((facility, index) => {
@@ -113,10 +114,10 @@ export default function Home() {
       <section id="rooms" className="bg-[#213b35] px-5 py-20 text-white sm:px-8 lg:px-10">
         <div className="mx-auto max-w-7xl">
           <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
-            <div><p className="text-xs font-bold uppercase tracking-[0.22em] text-amber-200">Rooms & suites</p><h2 className="mt-3 font-serif text-4xl sm:text-5xl">A room to settle into.</h2></div>
+            <div><p className="text-xs font-bold uppercase tracking-[0.22em] text-amber-200">Rooms & suites</p><ScrollText as="h2" className="mt-3 font-serif text-4xl sm:text-5xl" text="A room to settle into." /></div>
             <Link href="/rooms" className="inline-flex items-center gap-1 text-sm font-bold text-amber-200">Browse all demo rooms <ChevronRight className="h-4 w-4" /></Link>
           </div>
-          <p className="mt-4 max-w-2xl text-sm text-stone-300">Room names, images, amenities, rates and availability shown below are demo data. Replace them with verified hotel inventory before publishing.</p>
+          <ScrollText className="mt-4 max-w-2xl text-sm text-stone-300" text="Room names, images, amenities, rates and availability shown below are demo data. Replace them with verified hotel inventory before publishing." />
           <div className="mt-10 grid gap-6 md:grid-cols-3">
             {suites.map((room, roomIndex) => <motion.article key={room.id ?? `room-${roomIndex}`} {...reveal} className="group overflow-hidden rounded-2xl bg-white text-stone-900">
               {room.images[0] && <Image src={room.images[0]} alt={room.name} width={800} height={560} sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw" className="h-56 w-full object-cover transition duration-500 group-hover:scale-105" />}
@@ -139,23 +140,23 @@ export default function Home() {
         <div className="overflow-hidden rounded-3xl"><Image src={images.pool} alt="Swimming pool setting" width={1400} height={1000} sizes="(min-width: 1024px) 50vw, 100vw" className="h-full min-h-80 w-full object-cover" /></div>
         <motion.div {...reveal} className="flex flex-col justify-center">
           <p className="text-xs font-bold uppercase tracking-[0.22em] text-amber-700">Swimming pool</p>
-          <h2 className="mt-4 font-serif text-4xl leading-tight sm:text-5xl">A calm poolside pause.</h2>
-          <p className="mt-6 max-w-xl leading-relaxed text-stone-600">This dedicated pool feature can be updated with the hotel’s own photographs, access policy, and guest guidance. Until then, it presents the confirmed swimming-pool facility without adding unverified details.</p>
+          <ScrollText as="h2" className="mt-4 font-serif text-4xl leading-tight sm:text-5xl" text="A calm poolside pause." />
+          <ScrollText className="mt-6 max-w-xl leading-relaxed text-stone-600" text="This dedicated pool feature can be updated with the hotel’s own photographs, access policy, and guest guidance. Until then, it presents the confirmed swimming-pool facility without adding unverified details." />
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:gap-4"><a href="#book" className="inline-flex w-full items-center justify-center rounded-full bg-amber-200 px-5 py-3 text-center text-sm font-bold text-stone-950 transition hover:bg-amber-300 sm:w-auto">Enquire about your stay</a><Link href="/rooms" className="inline-flex w-full items-center justify-center rounded-full border border-stone-300 px-5 py-3 text-center text-sm font-bold transition hover:border-stone-900 sm:w-auto">Explore accommodation</Link></div>
         </motion.div>
       </section>
 
       <section id="about" className="bg-[#eee8dc] px-5 py-24 sm:px-8 lg:px-10">
-        <motion.div {...reveal} className="mx-auto max-w-3xl text-center"><p className="text-xs font-bold uppercase tracking-[0.22em] text-amber-700">About the hotel</p><h2 className="mt-4 font-serif text-4xl sm:text-5xl">Hospitality that can be made distinctly yours.</h2><p className="mt-6 leading-relaxed text-stone-600">{HOTEL.name}’s story, location details, and distinctive offerings can be added here after owner approval. This neutral demonstration copy is designed to be replaced easily with accurate information about the property and its guests.</p></motion.div>
+        <motion.div {...reveal} className="mx-auto max-w-3xl text-center"><p className="text-xs font-bold uppercase tracking-[0.22em] text-amber-700">About the hotel</p><ScrollText as="h2" className="mt-4 font-serif text-4xl sm:text-5xl" text="Hospitality that can be made distinctly yours." /><p className="mt-6 leading-relaxed text-stone-600">{HOTEL.name}’s story, location details, and distinctive offerings can be added here after owner approval. This neutral demonstration copy is designed to be replaced easily with accurate information about the property and its guests.</p></motion.div>
       </section>
 
       <section id="gallery" className="mx-auto max-w-7xl px-5 py-24 sm:px-8 lg:px-10">
-        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-xs font-bold uppercase tracking-[0.22em] text-amber-700">Gallery</p><h2 className="mt-3 font-serif text-4xl sm:text-5xl">A preview of the experience.</h2></div><p className="max-w-sm text-sm text-stone-500">Replace these demonstration photographs with licensed, hotel-approved images before launch.</p></div>
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-xs font-bold uppercase tracking-[0.22em] text-amber-700">Gallery</p><ScrollText as="h2" className="mt-3 font-serif text-4xl sm:text-5xl" text="A preview of the experience." /></div><p className="max-w-sm text-sm text-stone-500">Replace these demonstration photographs with licensed, hotel-approved images before launch.</p></div>
         <div className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-4"><Image src={images.pool} alt="Demo pool photograph" width={600} height={450} sizes="(min-width: 768px) 25vw, 50vw" className="h-52 w-full rounded-2xl object-cover md:h-72" /><Image src={images.dining} alt="Demo dining photograph" width={600} height={450} sizes="(min-width: 768px) 25vw, 50vw" className="h-52 w-full rounded-2xl object-cover md:h-72" /><Image src={images.room} alt="Demo room photograph" width={600} height={450} sizes="(min-width: 768px) 25vw, 50vw" className="h-52 w-full rounded-2xl object-cover md:h-72" /><Image src={images.hero} alt="Demo hotel exterior photograph" width={2200} height={1400} sizes="100vw" priority className="h-52 w-full rounded-2xl object-cover md:h-72" /></div>
       </section>
 
       <section id="book" className="mx-5 mb-8 overflow-hidden rounded-3xl bg-stone-900 sm:mx-8 lg:mx-10">
-        <div className="mx-auto grid max-w-6xl lg:grid-cols-2"><div className="p-6 text-white sm:p-14"><p className="text-xs font-bold uppercase tracking-[0.22em] text-amber-200">Reservations</p><h2 className="mt-4 font-serif text-4xl sm:text-5xl">Book Your Stay</h2><p className="mt-5 max-w-lg text-sm leading-relaxed text-stone-300">Send a reservation enquiry with your dates and guest details. The hotel can then confirm availability and payment directly.</p><Link href="/rooms" className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-full bg-amber-200 px-6 py-3.5 text-center text-sm font-bold text-stone-950 transition hover:bg-amber-300 sm:w-auto">Start a reservation <ArrowRight className="h-4 w-4" /></Link></div><Image src={images.room} alt="Demo hotel suite" width={1200} height={900} sizes="(min-width: 1024px) 50vw, 100vw" className="h-56 w-full object-cover sm:h-72 lg:h-full" /></div>
+        <div className="mx-auto grid max-w-6xl lg:grid-cols-2"><div className="p-6 text-white sm:p-14"><p className="text-xs font-bold uppercase tracking-[0.22em] text-amber-200">Reservations</p><ScrollText as="h2" className="mt-4 font-serif text-4xl sm:text-5xl" text="Book Your Stay" /><ScrollText className="mt-5 max-w-lg text-sm leading-relaxed text-stone-300" text="Send a reservation enquiry with your dates and guest details. The hotel can then confirm availability and payment directly." /><Link href="/rooms" className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-full bg-amber-200 px-6 py-3.5 text-center text-sm font-bold text-stone-950 transition hover:bg-amber-300 sm:w-auto">Start a reservation <ArrowRight className="h-4 w-4" /></Link></div><Image src={images.room} alt="Demo hotel suite" width={1200} height={900} sizes="(min-width: 1024px) 50vw, 100vw" className="h-56 w-full object-cover sm:h-72 lg:h-full" /></div>
       </section>
 
       <ContactSection />
