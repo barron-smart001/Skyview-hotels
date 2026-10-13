@@ -1,19 +1,19 @@
 import { NextResponse } from 'next/server';
-import { requireStaff } from '@/lib/auth';
+import { requireAdmin } from '@/lib/auth';
 import { BOOKING_SELECT, BOOKING_TRANSITIONS, mapBookingRow, type BookingRow } from '@/lib/bookings';
 
 const PAGE_SIZE = 50;
 
 /** Paginated booking list for reception. ?status=confirmed&page=0 */
 export async function GET(request: Request) {
-  const staff = await requireStaff();
-  if (staff instanceof NextResponse) return staff;
+  const admin = await requireAdmin();
+  if (admin instanceof NextResponse) return admin;
 
   const { searchParams } = new URL(request.url);
   const status = searchParams.get('status');
   const page = Math.max(0, Number.parseInt(searchParams.get('page') ?? '0', 10) || 0);
 
-  let query = staff.supabase
+  let query = admin.supabase
     .from('bookings')
     .select(BOOKING_SELECT, { count: 'exact' })
     .order('check_in', { ascending: false })

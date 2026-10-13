@@ -3,8 +3,9 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { BrandMark } from '@/components/layout/BrandMark';
 import { useRouter } from 'next/navigation';
-import { Building2, Mail, Lock, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
+import { Mail, Lock, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 export default function SignInPage() {
@@ -39,11 +40,11 @@ export default function SignInPage() {
         throw new Error('No profile was found for this account. Please contact the hotel.');
       }
 
-      // Staff land on the operations portal; everyone else returns to where they were headed.
-      const isStaff = ['receptionist', 'manager', 'admin'].includes(profile.role);
+      // Administrators land on the admin portal; everyone else returns to where they were headed.
+      const isAdmin = profile.role === 'admin';
       const next = new URLSearchParams(window.location.search).get('next');
       const safeNext = next && next.startsWith('/') && !next.startsWith('//') && !next.startsWith('/\\') ? next : null;
-      const destination = safeNext && (isStaff || !safeNext.startsWith('/admin')) ? safeNext : isStaff ? '/admin' : '/';
+      const destination = safeNext && (isAdmin || !safeNext.startsWith('/admin')) ? safeNext : isAdmin ? '/admin' : '/';
 
       router.push(destination);
       router.refresh();
@@ -55,9 +56,9 @@ export default function SignInPage() {
   };
 
   return (
-    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-slate-900">
+    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-stone-900">
       {/* Left visual banner */}
-      <div className="relative hidden lg:flex flex-col justify-between p-12 overflow-hidden bg-slate-950">
+      <div className="relative hidden lg:flex flex-col justify-between p-12 overflow-hidden bg-stone-950">
         <div className="absolute inset-0 z-0">
           <Image
             src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1600&q=80"
@@ -66,34 +67,24 @@ export default function SignInPage() {
             sizes="50vw"
             className="object-cover opacity-35"
             />
-          <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/60 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-stone-950 via-stone-950/60 to-transparent" />
         </div>
 
         {/* Brand */}
         <div className="relative z-10">
-          <Link href="/" className="inline-flex items-center gap-3 group">
-            <div className="w-11 h-11 rounded-2xl bg-linear-to-tr from-sky-500 to-cyan-400 flex items-center justify-center text-slate-950 shadow-lg shadow-sky-500/30">
-              <Building2 className="w-6 h-6" />
-            </div>
-            <div>
-              <span className="font-extrabold text-xl text-white tracking-tight block">SKYVIEW</span>
-              <span className="text-xs text-sky-400 font-medium tracking-widest uppercase">Grand Hotel & Suites</span>
-            </div>
-          </Link>
+          <BrandMark tone="light" />
         </div>
 
         {/* Testimonial Quote */}
         <div className="relative z-10 max-w-md">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/20 text-sky-300 text-xs font-semibold mb-4 border border-sky-500/30">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-200 text-xs font-semibold mb-4 border border-amber-500/30">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Five-Star Hospitality</span>
+            <span>Guest Account</span>
           </div>
-          <p className="text-lg font-medium text-slate-200 leading-relaxed mb-4">
-            &ldquo;An extraordinary sanctuary where intuitive service meets modern architecture and unforgettable luxury.&rdquo;
-          </p>
-          <div className="text-xs text-slate-400">
-            <span className="font-bold text-white block text-sm">International Luxury Travel Guide</span>
-            <span>2026 Winner — Best Urban Resort</span>
+          <p className="font-serif text-3xl leading-tight text-white mb-4">Experience Comfort.<br />Enjoy Every Moment.</p>
+          <div className="text-xs text-stone-400">
+            <span className="font-bold text-white block text-sm">Your stays in one place</span>
+            <span>View reservations, request services, and manage your profile.</span>
           </div>
         </div>
       </div>
@@ -102,18 +93,13 @@ export default function SignInPage() {
       <div className="flex items-center justify-center p-6 sm:p-12 bg-white">
         <div className="max-w-md w-full">
           {/* Mobile brand header */}
-          <div className="lg:hidden flex items-center gap-2.5 mb-8">
-            <div className="w-9 h-9 rounded-xl bg-linear-to-tr from-sky-600 to-cyan-500 flex items-center justify-center text-white">
-              <Building2 className="w-5 h-5" />
-            </div>
-            <span className="font-extrabold text-lg text-slate-900 tracking-tight">SKYVIEW HOTELS</span>
-          </div>
+          <BrandMark className="lg:hidden mb-8" />
 
           <div className="mb-6">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            <h2 className="font-serif text-3xl sm:text-4xl text-stone-900">
               Sign In to Your Account
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            <p className="text-xs sm:text-sm text-stone-500 mt-1">
               Sign in to manage your guest profile and reservations.
             </p>
           </div>
@@ -125,9 +111,9 @@ export default function SignInPage() {
               </div>
             )}
             <div>
-              <label className="text-xs font-semibold text-slate-700 block mb-1">Email Address</label>
+              <label className="text-xs font-semibold text-stone-700 block mb-1">Email Address</label>
               <div className="relative">
-                <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
                 <input
                   type="email"
                   value={email}
@@ -135,23 +121,23 @@ export default function SignInPage() {
                   required
                   autoComplete="email"
                   placeholder="name@example.com"
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                  className="w-full pl-10 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                 />
               </div>
             </div>
 
             <div>
               <div className="flex justify-between items-center mb-1">
-                <label className="text-xs font-semibold text-slate-700">Password</label>
+                <label className="text-xs font-semibold text-stone-700">Password</label>
                 <Link
                   href="/forgot-password"
-                  className="text-xs font-semibold text-sky-600 hover:text-sky-700"
+                  className="text-xs font-semibold text-amber-700 hover:text-amber-800"
                 >
                   Forgot password?
                 </Link>
               </div>
               <div className="relative">
-                <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
                 <input
                   type="password"
                   value={password}
@@ -159,7 +145,7 @@ export default function SignInPage() {
                   required
                   autoComplete="current-password"
                   placeholder="••••••••"
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                  className="w-full pl-10 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                 />
               </div>
             </div>
@@ -167,21 +153,21 @@ export default function SignInPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-linear-to-r from-sky-600 via-sky-500 to-cyan-600 hover:from-sky-700 hover:to-cyan-700 text-white font-bold text-sm rounded-xl shadow-md shadow-sky-500/20 transition flex items-center justify-center gap-2 active:scale-98 disabled:opacity-75"
+              className="w-full py-3 bg-stone-900 hover:bg-amber-800 text-white font-bold text-sm rounded-xl shadow-md shadow-amber-500/20 transition flex items-center justify-center gap-2 active:scale-98 disabled:opacity-75"
             >
               <span>{loading ? 'Signing In...' : 'Sign In as Guest'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-slate-100 text-center text-xs text-slate-500">
+          <div className="mt-6 pt-6 border-t border-stone-100 text-center text-xs text-stone-500">
             Don&apos;t have an account yet?{' '}
-            <Link href="/sign-up" className="font-bold text-sky-600 hover:text-sky-700">
+            <Link href="/sign-up" className="font-bold text-amber-700 hover:text-amber-800">
               Create an account
             </Link>
           </div>
 
-          <div className="mt-8 p-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center gap-2 text-[11px] text-slate-500">
+          <div className="mt-8 p-3 rounded-xl bg-stone-50 border border-stone-200/80 flex items-center gap-2 text-[11px] text-stone-500">
             <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
             <span>Encrypted authentication powered by Supabase & Next.js</span>
           </div>

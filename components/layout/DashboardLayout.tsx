@@ -5,7 +5,7 @@ import { Sidebar, Header } from './Navbar';
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-slate-50/70">
+    <div className="min-h-screen bg-stone-50/70">
       <Sidebar />
       <div className="lg:pl-64 flex flex-col min-h-screen">
         <Header />

@@ -1,22 +1,13 @@
 import { redirect } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
+import { AdminLayout } from '@/components/admin/AdminLayout';
+import { getAdminIdentity } from '@/lib/auth';
 
-/** Server-side guard for all operational pages. */
+/** Server-side guard for the whole admin portal: administrators only. */
 export default async function AdminRouteLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const result = await getAdminIdentity();
 
-  if (!user) redirect('/sign-in?next=/admin');
+  if (result === 'signed-out') redirect('/sign-in?next=/admin');
+  if (result === 'forbidden') redirect('/');
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  if (!profile || !['admin', 'manager', 'receptionist'].includes(profile.role)) {
-    redirect('/');
-  }
-
-  return children;
+  return <AdminLayout admin={result.identity}>{children}</AdminLayout>;
 }

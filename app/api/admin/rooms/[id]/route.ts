@@ -1,14 +1,14 @@
 import { NextResponse } from 'next/server';
 import { revalidateTag } from 'next/cache';
-import { requireStaff } from '@/lib/auth';
+import { requireAdmin } from '@/lib/auth';
 import { ROOMS_CACHE_TAG } from '@/lib/rooms';
 
 const ROOM_STATUSES = ['available', 'occupied', 'cleaning', 'maintenance'] as const;
 
 /** Housekeeping / availability updates. Requires migration 004 (staff room update policy). */
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const staff = await requireStaff();
-  if (staff instanceof NextResponse) return staff;
+  const admin = await requireAdmin();
+  if (admin instanceof NextResponse) return admin;
 
   const { id } = await params;
   const body = await request.json().catch(() => null);
@@ -18,7 +18,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     return NextResponse.json({ error: 'Invalid room status.' }, { status: 400 });
   }
 
-  const { data, error } = await staff.supabase
+  const { data, error } = await admin.supabase
     .from('rooms')
     .update({ status, updated_at: new Date().toISOString() })
     .eq('id', id)

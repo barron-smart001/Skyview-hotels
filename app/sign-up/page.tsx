@@ -3,8 +3,9 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { BrandMark } from '@/components/layout/BrandMark';
 import { useRouter } from 'next/navigation';
-import { Building2, Mail, Lock, User, Phone, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
+import { Mail, Lock, User, Phone, ArrowRight, ShieldCheck, Sparkles } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
 export default function SignUpPage() {
@@ -55,9 +56,9 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-slate-900">
+    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-stone-900">
       {/* Left visual banner */}
-      <div className="relative hidden lg:flex flex-col justify-between p-12 overflow-hidden bg-slate-950">
+      <div className="relative hidden lg:flex flex-col justify-between p-12 overflow-hidden bg-stone-950">
         <div className="absolute inset-0 z-0">
           <Image
             src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=1600&q=80"
@@ -66,34 +67,24 @@ export default function SignUpPage() {
             sizes="50vw"
             className="object-cover opacity-35"
             />
-          <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/60 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-stone-950 via-stone-950/60 to-transparent" />
         </div>
 
         {/* Brand */}
         <div className="relative z-10">
-          <Link href="/" className="inline-flex items-center gap-3 group">
-            <div className="w-11 h-11 rounded-2xl bg-linear-to-tr from-sky-500 to-cyan-400 flex items-center justify-center text-slate-950 shadow-lg shadow-sky-500/30">
-              <Building2 className="w-6 h-6" />
-            </div>
-            <div>
-              <span className="font-extrabold text-xl text-white tracking-tight block">SKYVIEW</span>
-              <span className="text-xs text-sky-400 font-medium tracking-widest uppercase">Grand Hotel & Suites</span>
-            </div>
-          </Link>
+          <BrandMark tone="light" />
         </div>
 
         {/* Perks Quote */}
         <div className="relative z-10 max-w-md">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/20 text-sky-300 text-xs font-semibold mb-4 border border-sky-500/30">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-200 text-xs font-semibold mb-4 border border-amber-500/30">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Skyview Membership</span>
+            <span>Create an Account</span>
           </div>
-          <p className="text-lg font-medium text-slate-200 leading-relaxed mb-4">
-            Join the Skyview VIP Circle to unlock guaranteed direct booking rates, complimentary room upgrades, and priority late check-outs.
-          </p>
-          <div className="text-xs text-slate-400">
-            <span className="font-bold text-white block text-sm">Complimentary Gold Status</span>
-            <span>Applied automatically on your first stay</span>
+          <p className="font-serif text-3xl leading-tight text-white mb-4">Experience Comfort.<br />Enjoy Every Moment.</p>
+          <div className="text-xs text-stone-400">
+            <span className="font-bold text-white block text-sm">Book faster next time</span>
+            <span>Your details are saved and your reservations stay linked to your account.</span>
           </div>
         </div>
       </div>
@@ -102,18 +93,13 @@ export default function SignUpPage() {
       <div className="flex items-center justify-center p-6 sm:p-12 bg-white">
         <div className="max-w-md w-full">
           {/* Mobile brand header */}
-          <div className="lg:hidden flex items-center gap-2.5 mb-8">
-            <div className="w-9 h-9 rounded-xl bg-linear-to-tr from-sky-600 to-cyan-500 flex items-center justify-center text-white">
-              <Building2 className="w-5 h-5" />
-            </div>
-            <span className="font-extrabold text-lg text-slate-900 tracking-tight">SKYVIEW HOTELS</span>
-          </div>
+          <BrandMark className="lg:hidden mb-8" />
 
           <div className="mb-6">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            <h2 className="font-serif text-3xl sm:text-4xl text-stone-900">
               Create Your Guest Profile
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            <p className="text-xs sm:text-sm text-stone-500 mt-1">
               Create an account to manage your reservations and guest profile.
             </p>
           </div>
@@ -130,54 +116,54 @@ export default function SignUpPage() {
               </div>
             )}
             <div>
-              <label className="text-xs font-semibold text-slate-700 block mb-1">Full Name</label>
+              <label className="text-xs font-semibold text-stone-700 block mb-1">Full Name</label>
               <div className="relative">
-                <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <User className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
                 <input
                   type="text"
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   required
                   placeholder="Your first and last name"
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                  className="w-full pl-10 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                 />
               </div>
             </div>
 
             <div>
-              <label className="text-xs font-semibold text-slate-700 block mb-1">Email Address</label>
+              <label className="text-xs font-semibold text-stone-700 block mb-1">Email Address</label>
               <div className="relative">
-                <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   placeholder="you@example.com"
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                  className="w-full pl-10 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                 />
               </div>
             </div>
 
             <div>
-              <label className="text-xs font-semibold text-slate-700 block mb-1">Phone Number</label>
+              <label className="text-xs font-semibold text-stone-700 block mb-1">Phone Number</label>
               <div className="relative">
-                <Phone className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Phone className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
                 <input
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   required
                   placeholder="+234 812 345 6789"
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                  className="w-full pl-10 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="password" className="text-xs font-semibold text-slate-700 block mb-1">Password</label>
+              <label htmlFor="password" className="text-xs font-semibold text-stone-700 block mb-1">Password</label>
               <div className="relative">
-                <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Lock className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400" />
                 <input
                   id="password"
                   type="password"
@@ -187,7 +173,7 @@ export default function SignUpPage() {
                   minLength={8}
                   autoComplete="new-password"
                   placeholder="At least 8 characters"
-                  className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                  className="w-full pl-10 pr-4 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                 />
               </div>
             </div>
@@ -195,21 +181,21 @@ export default function SignUpPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-linear-to-r from-sky-600 via-sky-500 to-cyan-600 hover:from-sky-700 hover:to-cyan-700 text-white font-bold text-sm rounded-xl shadow-md shadow-sky-500/20 transition flex items-center justify-center gap-2 active:scale-98 disabled:opacity-75"
+              className="w-full py-3 bg-stone-900 hover:bg-amber-800 text-white font-bold text-sm rounded-xl shadow-md shadow-amber-500/20 transition flex items-center justify-center gap-2 active:scale-98 disabled:opacity-75"
             >
               <span>{loading ? 'Creating Account...' : 'Create Guest Account'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-slate-100 text-center text-xs text-slate-500">
+          <div className="mt-6 pt-6 border-t border-stone-100 text-center text-xs text-stone-500">
             Already have a Skyview account?{' '}
-            <Link href="/sign-in" className="font-bold text-sky-600 hover:text-sky-700">
+            <Link href="/sign-in" className="font-bold text-amber-700 hover:text-amber-800">
               Sign In
             </Link>
           </div>
 
-          <div className="mt-8 p-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center gap-2 text-[11px] text-slate-500">
+          <div className="mt-8 p-3 rounded-xl bg-stone-50 border border-stone-200/80 flex items-center gap-2 text-[11px] text-stone-500">
             <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
             <span>Your password is securely managed by Supabase authentication.</span>
           </div>

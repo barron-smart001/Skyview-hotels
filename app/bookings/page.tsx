@@ -62,27 +62,27 @@ export default function BookingsPage() {
     <DashboardLayout>
       <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-700 text-xs font-semibold mb-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold mb-2">
             <Sparkles className="w-3.5 h-3.5" /> Stay Management
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="font-serif text-3xl sm:text-4xl text-stone-900">
             My Bookings & Reservations
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-stone-500 mt-1">
             Access upcoming reservation details, invoices, and service requests for your visits.
           </p>
         </div>
 
         <Link
           href="/rooms"
-          className="self-start md:self-auto px-4 py-2.5 bg-linear-to-r from-sky-600 to-cyan-600 hover:from-sky-700 hover:to-cyan-700 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-sm transition"
+          className="self-start md:self-auto px-4 py-2.5 bg-stone-900 hover:bg-amber-800 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-sm transition"
         >
           Book New Suite
         </Link>
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-slate-200 mb-6 gap-6">
+      <div className="flex border-b border-stone-200 mb-6 gap-6">
         {([
           { key: 'all', label: 'All Stays' },
           { key: 'upcoming', label: 'Upcoming Stays' },
@@ -93,8 +93,8 @@ export default function BookingsPage() {
             onClick={() => setTab(t.key)}
             className={`pb-3 text-sm font-semibold border-b-2 transition -mb-0.5 ${
               tab === t.key
-                ? 'border-sky-600 text-sky-600'
-                : 'border-transparent text-slate-500 hover:text-slate-800'
+                ? 'border-amber-700 text-amber-700'
+                : 'border-transparent text-stone-500 hover:text-stone-800'
             }`}
           >
             {t.label}
@@ -106,19 +106,19 @@ export default function BookingsPage() {
         <p role="alert" className="mb-4 rounded-xl bg-rose-50 p-3 text-xs font-semibold text-rose-700">{error}</p>
       )}
 
-      {loadState === 'loading' && <p className="py-10 text-center text-sm text-slate-500">Loading your bookings…</p>}
+      {loadState === 'loading' && <p className="py-10 text-center text-sm text-stone-500">Loading your bookings…</p>}
 
       {loadState === 'signed-out' && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center">
-          <p className="text-sm text-slate-600">Sign in to see the stays booked with your account.</p>
-          <Link href="/sign-in" className="mt-4 inline-block rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
+        <div className="rounded-2xl border border-stone-200 bg-white p-8 text-center">
+          <p className="text-sm text-stone-600">Sign in to see the stays booked with your account.</p>
+          <Link href="/sign-in" className="mt-4 inline-block rounded-xl bg-stone-900 px-4 py-2 text-sm font-semibold text-white">
             Sign in
           </Link>
         </div>
       )}
 
       {loadState === 'ready' && filteredBookings.length === 0 && (
-        <p className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">
+        <p className="rounded-2xl border border-stone-200 bg-white p-8 text-center text-sm text-stone-500">
           {bookings.length === 0 ? 'You have no bookings yet.' : 'No bookings in this view.'}
         </p>
       )}
@@ -128,7 +128,7 @@ export default function BookingsPage() {
         {filteredBookings.map((b) => (
           <div
             key={b.id}
-            className="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-sm hover:shadow-md transition flex flex-col md:flex-row gap-6 items-start md:items-center justify-between"
+            className="bg-white rounded-2xl border border-stone-200/90 p-5 sm:p-6 shadow-sm hover:shadow-md transition flex flex-col md:flex-row gap-6 items-start md:items-center justify-between"
           >
             <div className="flex flex-col sm:flex-row gap-5 items-start sm:items-center">
               {b.room.images[0] ? (
@@ -141,11 +141,11 @@ export default function BookingsPage() {
                   className="w-full sm:w-36 h-28 rounded-xl object-cover"
                   />
               ) : (
-                <div className="w-full sm:w-36 h-28 rounded-xl bg-slate-100" />
+                <div className="w-full sm:w-36 h-28 rounded-xl bg-stone-100" />
               )}
               <div>
                 <div className="flex items-center gap-2 mb-1.5">
-                  <span className="text-xs font-mono font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded-md">
+                  <span className="text-xs font-mono font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-md">
                     {b.bookingReference}
                   </span>
                   <span
@@ -154,7 +154,7 @@ export default function BookingsPage() {
                         ? 'bg-emerald-50 text-emerald-700'
                         : b.status === 'cancelled'
                         ? 'bg-rose-50 text-rose-700'
-                        : 'bg-slate-100 text-slate-700'
+                        : 'bg-stone-100 text-stone-700'
                     }`}
                   >
                     {b.status === 'confirmed' ? (
@@ -168,20 +168,20 @@ export default function BookingsPage() {
                   </span>
                 </div>
 
-                <h3 className="text-base font-bold text-slate-900">{b.room.name}</h3>
-                <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
-                  <MapPin className="w-3.5 h-3.5 text-slate-400" /> {HOTEL.name} • {b.guestsCount} {b.guestsCount === 1 ? 'Guest' : 'Guests'}
+                <h3 className="text-base font-bold text-stone-900">{b.room.name}</h3>
+                <p className="text-xs text-stone-500 flex items-center gap-1 mt-1">
+                  <MapPin className="w-3.5 h-3.5 text-stone-400" /> {HOTEL.name} • {b.guestsCount} {b.guestsCount === 1 ? 'Guest' : 'Guests'}
                 </p>
-                <p className="text-xs text-slate-600 flex items-center gap-1.5 mt-2 font-medium">
-                  <Calendar className="w-3.5 h-3.5 text-sky-600" /> {b.checkIn} to {b.checkOut}
+                <p className="text-xs text-stone-600 flex items-center gap-1.5 mt-2 font-medium">
+                  <Calendar className="w-3.5 h-3.5 text-amber-700" /> {b.checkIn} to {b.checkOut}
                 </p>
               </div>
             </div>
 
-            <div className="w-full md:w-auto flex md:flex-col items-center md:items-end justify-between border-t md:border-t-0 pt-4 md:pt-0 border-slate-100 gap-3">
+            <div className="w-full md:w-auto flex md:flex-col items-center md:items-end justify-between border-t md:border-t-0 pt-4 md:pt-0 border-stone-100 gap-3">
               <div className="text-left md:text-right">
-                <span className="text-[11px] text-slate-400 block font-medium">{b.paymentStatus === 'paid' ? 'Total Paid' : 'Total Due'}</span>
-                <span className="text-base sm:text-lg font-extrabold text-slate-900">
+                <span className="text-[11px] text-stone-400 block font-medium">{b.paymentStatus === 'paid' ? 'Total Paid' : 'Total Due'}</span>
+                <span className="text-base sm:text-lg font-extrabold text-stone-900">
                   {formatCurrency(b.totalAmount)}
                 </span>
               </div>
@@ -198,7 +198,7 @@ export default function BookingsPage() {
                 )}
                 <Link
                   href="/services"
-                  className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl flex items-center gap-1.5 transition"
+                  className="px-3.5 py-2 bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold text-xs rounded-xl flex items-center gap-1.5 transition"
                 >
                   <MessageSquare className="w-3.5 h-3.5" />
                   <span>Request Services</span>

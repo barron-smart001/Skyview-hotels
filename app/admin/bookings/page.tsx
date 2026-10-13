@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { AdminLayout } from '@/components/admin/AdminLayout';
 import { Booking } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 import { CheckCircle2, LogIn, LogOut, XCircle } from 'lucide-react';
@@ -93,10 +92,10 @@ export default function AdminBookingsPage() {
   };
 
   return (
-    <AdminLayout>
-      <div className="mb-8">
-        <h1 className="text-2xl font-extrabold text-white tracking-tight">Guest Reservations & Check-Ins</h1>
-        <p className="text-xs text-slate-400 mt-0.5">Manage guest folios, reception check-ins, departures, and cancellations.</p>
+    <>
+          <div className="mb-8">
+        <h1 className="font-serif text-3xl text-white">Guest Reservations & Check-Ins</h1>
+        <p className="text-xs text-stone-400 mt-0.5">Manage guest folios, reception check-ins, departures, and cancellations.</p>
       </div>
 
       {/* Filter Tabs */}
@@ -107,8 +106,8 @@ export default function AdminBookingsPage() {
             onClick={() => selectFilter(status)}
             className={`px-3.5 py-1.5 rounded-xl text-xs font-bold capitalize transition ${
               filterStatus === status
-                ? 'bg-sky-500 text-slate-950 shadow-sm'
-                : 'bg-slate-950 border border-slate-800 text-slate-400 hover:text-white'
+                ? 'bg-amber-500 text-stone-950 shadow-sm'
+                : 'bg-stone-950 border border-stone-800 text-stone-400 hover:text-white'
             }`}
           >
             {status.replace('-', ' ')}
@@ -121,11 +120,11 @@ export default function AdminBookingsPage() {
       )}
 
       {/* Bookings Table */}
-      <div className="bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden">
+      <div className="bg-stone-950 rounded-2xl border border-stone-800 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-slate-800 text-slate-400 font-semibold bg-slate-900/40">
+              <tr className="border-b border-stone-800 text-stone-400 font-semibold bg-stone-900/40">
                 <th className="p-4">Reference & Guest</th>
                 <th className="p-4">Suite Reserved</th>
                 <th className="p-4">Check-in / Check-out</th>
@@ -135,25 +134,25 @@ export default function AdminBookingsPage() {
                 <th className="p-4 text-right">Reception Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-stone-800/60">
               {!loading && bookings.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-slate-500">No bookings match this filter.</td>
+                  <td colSpan={7} className="p-8 text-center text-stone-500">No bookings match this filter.</td>
                 </tr>
               )}
               {bookings.map((b) => (
-                <tr key={b.id} className="hover:bg-slate-900/40 transition">
+                <tr key={b.id} className="hover:bg-stone-900/40 transition">
                   <td className="p-4">
-                    <span className="font-mono text-sky-400 font-bold block">{b.bookingReference}</span>
+                    <span className="font-mono text-amber-300 font-bold block">{b.bookingReference}</span>
                     <span className="text-white font-medium">{b.guestName}</span>
-                    <span className="text-[11px] text-slate-500 block">{b.guestPhone}</span>
+                    <span className="text-[11px] text-stone-500 block">{b.guestPhone}</span>
                   </td>
-                  <td className="p-4 text-slate-300 font-medium">{b.room.name}</td>
-                  <td className="p-4 text-slate-400">
+                  <td className="p-4 text-stone-300 font-medium">{b.room.name}</td>
+                  <td className="p-4 text-stone-400">
                     <div>{b.checkIn}</div>
-                    <div className="text-[11px] text-slate-500">to {b.checkOut}</div>
+                    <div className="text-[11px] text-stone-500">to {b.checkOut}</div>
                   </td>
-                  <td className="p-4 text-slate-300">{b.guestsCount} {b.guestsCount === 1 ? 'Guest' : 'Guests'}</td>
+                  <td className="p-4 text-stone-300">{b.guestsCount} {b.guestsCount === 1 ? 'Guest' : 'Guests'}</td>
                   <td className="p-4">
                     <div className="font-bold text-emerald-400">{formatCurrency(b.totalAmount)}</div>
                     <span
@@ -168,14 +167,14 @@ export default function AdminBookingsPage() {
                     <span
                       className={`px-2.5 py-1 rounded-full text-[10px] font-bold capitalize ${
                         b.status === 'confirmed'
-                          ? 'bg-sky-500/10 text-sky-400 border border-sky-500/20'
+                          ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
                           : b.status === 'checked-in'
                           ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
                           : b.status === 'cancelled'
                           ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
                           : b.status === 'pending'
                           ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                          : 'bg-slate-800 text-slate-400'
+                          : 'bg-stone-800 text-stone-400'
                       }`}
                     >
                       {b.status}
@@ -187,7 +186,7 @@ export default function AdminBookingsPage() {
                         <button
                           disabled={updatingId === b.id}
                           onClick={() => updateBookingStatus(b.id, 'confirmed')}
-                          className="px-2.5 py-1.5 bg-sky-500/10 text-sky-400 hover:bg-sky-500/20 border border-sky-500/30 rounded-lg text-[11px] font-bold flex items-center gap-1 transition disabled:opacity-50"
+                          className="px-2.5 py-1.5 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 border border-indigo-500/30 rounded-lg text-[11px] font-bold flex items-center gap-1 transition disabled:opacity-50"
                         >
                           <CheckCircle2 className="w-3 h-3" /> Confirm
                         </button>
@@ -207,7 +206,7 @@ export default function AdminBookingsPage() {
                         <button
                           disabled={updatingId === b.id}
                           onClick={() => updateBookingStatus(b.id, 'completed')}
-                          className="px-2.5 py-1.5 bg-sky-500/10 text-sky-400 hover:bg-sky-500/20 border border-sky-500/30 rounded-lg text-[11px] font-bold flex items-center gap-1 transition disabled:opacity-50"
+                          className="px-2.5 py-1.5 bg-indigo-500/10 text-indigo-400 hover:bg-indigo-500/20 border border-indigo-500/30 rounded-lg text-[11px] font-bold flex items-center gap-1 transition disabled:opacity-50"
                         >
                           <LogOut className="w-3 h-3" /> Check Out
                         </button>
@@ -217,7 +216,7 @@ export default function AdminBookingsPage() {
                         <button
                           disabled={updatingId === b.id}
                           onClick={() => updateBookingStatus(b.id, 'cancelled')}
-                          className="p-1.5 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition disabled:opacity-50"
+                          className="p-1.5 text-stone-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition disabled:opacity-50"
                           title="Cancel Booking"
                           aria-label="Cancel booking"
                         >
@@ -231,15 +230,15 @@ export default function AdminBookingsPage() {
             </tbody>
           </table>
         </div>
-        {loading && <p className="p-4 text-center text-xs text-slate-500">Loading bookings…</p>}
+        {loading && <p className="p-4 text-center text-xs text-stone-500">Loading bookings…</p>}
         {!loading && bookings.length < total && (
-          <div className="border-t border-slate-800 p-4 text-center">
-            <button onClick={loadMore} className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold text-slate-300 hover:text-white">
+          <div className="border-t border-stone-800 p-4 text-center">
+            <button onClick={loadMore} className="rounded-xl bg-stone-900 px-4 py-2 text-xs font-bold text-stone-300 hover:text-white">
               Load more ({total - bookings.length} remaining)
             </button>
           </div>
         )}
       </div>
-    </AdminLayout>
+    </>
   );
 }

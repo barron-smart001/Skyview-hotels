@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
-import { requireStaff } from '@/lib/auth';
+import { requireAdmin } from '@/lib/auth';
 import { BOOKING_TRANSITIONS } from '@/lib/bookings';
 import type { Booking } from '@/types';
 
 /** Reception status changes: confirm, check in, check out, cancel. */
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const staff = await requireStaff();
-  if (staff instanceof NextResponse) return staff;
+  const admin = await requireAdmin();
+  if (admin instanceof NextResponse) return admin;
 
   const { id } = await params;
   const body = await request.json().catch(() => null);
@@ -16,7 +16,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     return NextResponse.json({ error: 'Invalid status.' }, { status: 400 });
   }
 
-  const { data: booking, error } = await staff.supabase
+  const { data: booking, error } = await admin.supabase
     .from('bookings')
     .select('id, status')
     .eq('id', id)
@@ -31,7 +31,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   }
 
   // Matching on the current status prevents two receptionists overwriting each other.
-  const { data: updated, error: updateError } = await staff.supabase
+  const { data: updated, error: updateError } = await admin.supabase
     .from('bookings')
     .update({ status: nextStatus, updated_at: new Date().toISOString() })
     .eq('id', id)

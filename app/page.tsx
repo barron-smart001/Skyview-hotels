@@ -2,15 +2,16 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion, useReducedMotion } from 'framer-motion';
 import {
   ArrowRight, BedDouble, Car, ChevronRight, Clock3, MapPin, ShieldCheck,
-  Sparkles, Star, UtensilsCrossed, Wifi,
+  Sparkles, Star, Wifi,
 } from 'lucide-react';
 import { SiteHeader } from '@/components/layout/SiteHeader';
 import { BookingModal } from '@/components/rooms/BookingModal';
 import { HOTEL, FACILITIES } from '@/lib/hotel-config';
-import { MOCK_ROOMS } from '@/lib/data/mock-data';
+import { useRoomCatalog } from '@/components/rooms/useRoomCatalog';
 import type { Room } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 
@@ -26,22 +27,25 @@ const facilityIcons = [Wifi, Sparkles, BedDouble, Car] as const;
 export default function Home() {
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
   const reduceMotion = useReducedMotion();
-  const suites = MOCK_ROOMS.filter((room) => room.featured).slice(0, 3);
+  // Same live catalog as /rooms, so room IDs and prices match the booking flow.
+  const { rooms } = useRoomCatalog();
+  const featured = rooms.filter((room) => room.featured);
+  const suites = (featured.length ? featured : rooms).slice(0, 3);
   const reveal = reduceMotion ? {} : { initial: { opacity: 0, y: 14 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, amount: 0.2 }, transition: { duration: 0.45 } };
 
   return (
     <main id="home" className="overflow-hidden bg-[#faf8f4] text-stone-900">
       <section className="relative min-h-[720px] bg-stone-950 sm:min-h-[800px]">
-        <img src={images.hero} alt="Hotel exterior at dusk" className="absolute inset-0 h-full w-full object-cover opacity-75" />
-        <div className="absolute inset-0 bg-gradient-to-b from-stone-950/80 via-stone-950/25 to-stone-950/85" />
+        <Image src={images.hero} alt="Hotel exterior at dusk" width={2200} height={1400} sizes="100vw" priority className="absolute inset-0 h-full w-full object-cover opacity-75" />
+        <div className="absolute inset-0 bg-linear-to-b from-stone-950/80 via-stone-950/25 to-stone-950/85" />
         <SiteHeader />
         <motion.div {...reveal} className="relative mx-auto flex min-h-[720px] max-w-7xl flex-col justify-end px-5 pb-20 pt-36 sm:min-h-[800px] sm:px-8 lg:px-10">
           <p className="mb-5 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.28em] text-amber-200"><span className="h-px w-10 bg-amber-200" /> Hotel website demonstration</p>
           <h1 className="max-w-4xl font-serif text-5xl leading-[0.98] text-white sm:text-7xl lg:text-8xl">Experience Comfort.<br />Enjoy Every Moment.</h1>
           <p className="mt-7 max-w-xl text-base leading-relaxed text-stone-100 sm:text-lg">Discover a welcoming stay with comfortable accommodation, relaxing facilities, and convenient service.</p>
-          <div className="mt-9 flex flex-wrap gap-4">
-            <a href="#rooms" className="rounded-full bg-amber-200 px-6 py-3.5 text-sm font-bold text-stone-950 transition hover:bg-white">Explore Rooms</a>
-            <a href="#book" className="rounded-full border border-white/45 px-6 py-3.5 text-sm font-bold text-white transition hover:bg-white/10">Make a Reservation</a>
+          <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:gap-4">
+            <a href="#rooms" className="inline-flex w-full items-center justify-center rounded-full bg-amber-200 px-6 py-3.5 text-center text-sm font-bold text-stone-950 transition hover:bg-white sm:w-auto">Explore Rooms</a>
+            <a href="#book" className="inline-flex w-full items-center justify-center rounded-full border border-white/45 px-6 py-3.5 text-center text-sm font-bold text-white transition hover:bg-white/10 sm:w-auto">Make a Reservation</a>
           </div>
         </motion.div>
       </section>
@@ -55,7 +59,7 @@ export default function Home() {
         <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {FACILITIES.map((facility, index) => {
             const Icon = facilityIcons[index];
-            return <motion.article {...reveal} key={facility.title} className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
+            return <motion.article key={facility.title} {...reveal} className="rounded-2xl border border-stone-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
               <Icon className="h-6 w-6 text-amber-700" />
               <h3 className="mt-8 font-serif text-2xl">{facility.title}</h3>
               <p className="mt-3 text-sm leading-relaxed text-stone-600">{facility.description}</p>
@@ -72,16 +76,16 @@ export default function Home() {
           </div>
           <p className="mt-4 max-w-2xl text-sm text-stone-300">Room names, images, amenities, rates and availability shown below are demo data. Replace them with verified hotel inventory before publishing.</p>
           <div className="mt-10 grid gap-6 md:grid-cols-3">
-            {suites.map((room) => <motion.article {...reveal} key={room.id} className="group overflow-hidden rounded-2xl bg-white text-stone-900">
-              <img src={room.images[0]} alt={room.name} className="h-56 w-full object-cover transition duration-500 group-hover:scale-105" />
+            {suites.map((room, roomIndex) => <motion.article key={room.id ?? `room-${roomIndex}`} {...reveal} className="group overflow-hidden rounded-2xl bg-white text-stone-900">
+              {room.images[0] && <Image src={room.images[0]} alt={room.name} width={800} height={560} sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw" className="h-56 w-full object-cover transition duration-500 group-hover:scale-105" />}
               <div className="p-6">
                 <div className="flex items-center justify-between text-xs"><span className="rounded-full bg-amber-100 px-2.5 py-1 font-bold text-amber-900">{room.type}</span><span className="flex items-center gap-1"><Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" /> Demo</span></div>
                 <h3 className="mt-4 font-serif text-2xl">{room.name}</h3>
                 <p className="mt-2 min-h-10 text-sm leading-relaxed text-stone-600">{room.description}</p>
                 <p className="mt-4 text-xs font-semibold text-stone-500">Demo rate from <span className="text-stone-900">{formatCurrency(room.pricePerNight)}</span> / night</p>
-                <div className="mt-5 flex items-center justify-between border-t border-stone-100 pt-4">
-                  <Link href="/rooms" className="text-sm font-bold text-stone-700">View Details</Link>
-                  <button onClick={() => setSelectedRoom(room)} className="rounded-full bg-stone-900 px-4 py-2 text-sm font-bold text-white transition hover:bg-amber-700">Book This Room</button>
+                <div className="mt-5 flex flex-col gap-3 border-t border-stone-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                  <Link href={`/rooms/${encodeURIComponent(room.id)}`} className="text-center text-sm font-bold text-stone-700 sm:text-left">View Details</Link>
+                  <button onClick={() => setSelectedRoom(room)} className="w-full rounded-full bg-amber-200 px-4 py-2.5 text-center text-sm font-bold text-stone-950 transition hover:bg-amber-300 sm:w-auto">Book This Room</button>
                 </div>
               </div>
             </motion.article>)}
@@ -90,12 +94,12 @@ export default function Home() {
       </section>
 
       <section className="mx-auto grid max-w-7xl gap-10 px-5 py-24 sm:px-8 lg:grid-cols-2 lg:px-10">
-        <div className="overflow-hidden rounded-3xl"><img src={images.pool} alt="Swimming pool setting" className="h-full min-h-80 w-full object-cover" /></div>
+        <div className="overflow-hidden rounded-3xl"><Image src={images.pool} alt="Swimming pool setting" width={1400} height={1000} sizes="(min-width: 1024px) 50vw, 100vw" className="h-full min-h-80 w-full object-cover" /></div>
         <motion.div {...reveal} className="flex flex-col justify-center">
           <p className="text-xs font-bold uppercase tracking-[0.22em] text-amber-700">Swimming pool</p>
           <h2 className="mt-4 font-serif text-4xl leading-tight sm:text-5xl">A calm poolside pause.</h2>
           <p className="mt-6 max-w-xl leading-relaxed text-stone-600">This dedicated pool feature can be updated with the hotel’s own photographs, access policy, and guest guidance. Until then, it presents the confirmed swimming-pool facility without adding unverified details.</p>
-          <div className="mt-8 flex flex-wrap gap-4"><a href="#book" className="rounded-full bg-stone-900 px-5 py-3 text-sm font-bold text-white transition hover:bg-amber-700">Enquire about your stay</a><Link href="/rooms" className="rounded-full border border-stone-300 px-5 py-3 text-sm font-bold transition hover:border-stone-900">Explore accommodation</Link></div>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:gap-4"><a href="#book" className="inline-flex w-full items-center justify-center rounded-full bg-amber-200 px-5 py-3 text-center text-sm font-bold text-stone-950 transition hover:bg-amber-300 sm:w-auto">Enquire about your stay</a><Link href="/rooms" className="inline-flex w-full items-center justify-center rounded-full border border-stone-300 px-5 py-3 text-center text-sm font-bold transition hover:border-stone-900 sm:w-auto">Explore accommodation</Link></div>
         </motion.div>
       </section>
 
@@ -105,11 +109,11 @@ export default function Home() {
 
       <section id="gallery" className="mx-auto max-w-7xl px-5 py-24 sm:px-8 lg:px-10">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><p className="text-xs font-bold uppercase tracking-[0.22em] text-amber-700">Gallery</p><h2 className="mt-3 font-serif text-4xl sm:text-5xl">A preview of the experience.</h2></div><p className="max-w-sm text-sm text-stone-500">Replace these demonstration photographs with licensed, hotel-approved images before launch.</p></div>
-        <div className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-4"><img src={images.pool} alt="Demo pool photograph" className="h-52 w-full rounded-2xl object-cover md:h-72" /><img src={images.dining} alt="Demo dining photograph" className="h-52 w-full rounded-2xl object-cover md:h-72" /><img src={images.room} alt="Demo room photograph" className="h-52 w-full rounded-2xl object-cover md:h-72" /><img src={images.hero} alt="Demo hotel exterior photograph" className="h-52 w-full rounded-2xl object-cover md:h-72" /></div>
+        <div className="mt-10 grid grid-cols-2 gap-4 md:grid-cols-4"><Image src={images.pool} alt="Demo pool photograph" width={600} height={450} sizes="(min-width: 768px) 25vw, 50vw" className="h-52 w-full rounded-2xl object-cover md:h-72" /><Image src={images.dining} alt="Demo dining photograph" width={600} height={450} sizes="(min-width: 768px) 25vw, 50vw" className="h-52 w-full rounded-2xl object-cover md:h-72" /><Image src={images.room} alt="Demo room photograph" width={600} height={450} sizes="(min-width: 768px) 25vw, 50vw" className="h-52 w-full rounded-2xl object-cover md:h-72" /><Image src={images.hero} alt="Demo hotel exterior photograph" width={2200} height={1400} sizes="100vw" priority className="h-52 w-full rounded-2xl object-cover md:h-72" /></div>
       </section>
 
       <section id="book" className="mx-5 mb-8 overflow-hidden rounded-3xl bg-stone-900 sm:mx-8 lg:mx-10">
-        <div className="mx-auto grid max-w-6xl lg:grid-cols-2"><div className="p-9 text-white sm:p-14"><p className="text-xs font-bold uppercase tracking-[0.22em] text-amber-200">Reservations</p><h2 className="mt-4 font-serif text-4xl sm:text-5xl">Book Your Stay</h2><p className="mt-5 max-w-lg text-sm leading-relaxed text-stone-300">Send a reservation enquiry with your dates and guest details. The hotel can then confirm availability and payment directly.</p><Link href="/rooms" className="mt-8 inline-flex items-center gap-2 rounded-full bg-amber-200 px-6 py-3.5 text-sm font-bold text-stone-950 transition hover:bg-white">Start a reservation <ArrowRight className="h-4 w-4" /></Link></div><img src={images.room} alt="Demo hotel suite" className="h-72 w-full object-cover lg:h-full" /></div>
+        <div className="mx-auto grid max-w-6xl lg:grid-cols-2"><div className="p-6 text-white sm:p-14"><p className="text-xs font-bold uppercase tracking-[0.22em] text-amber-200">Reservations</p><h2 className="mt-4 font-serif text-4xl sm:text-5xl">Book Your Stay</h2><p className="mt-5 max-w-lg text-sm leading-relaxed text-stone-300">Send a reservation enquiry with your dates and guest details. The hotel can then confirm availability and payment directly.</p><Link href="/rooms" className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-full bg-amber-200 px-6 py-3.5 text-center text-sm font-bold text-stone-950 transition hover:bg-amber-300 sm:w-auto">Start a reservation <ArrowRight className="h-4 w-4" /></Link></div><Image src={images.room} alt="Demo hotel suite" width={1200} height={900} sizes="(min-width: 1024px) 50vw, 100vw" className="h-56 w-full object-cover sm:h-72 lg:h-full" /></div>
       </section>
 
       <footer id="contact" className="border-t border-stone-200 px-5 py-10 sm:px-8 lg:px-10"><div className="mx-auto grid max-w-7xl gap-8 text-sm md:grid-cols-3"><div><p className="font-serif text-2xl">{HOTEL.name}</p><p className="mt-2 text-stone-500">Hotel website demonstration.</p></div><div className="text-stone-600"><p className="flex items-center gap-2"><MapPin className="h-4 w-4 text-amber-700" /> {HOTEL.location}</p><p className="mt-2 flex items-center gap-2"><Clock3 className="h-4 w-4 text-amber-700" /> Contact details to be confirmed by the hotel</p></div><div className="flex gap-4 md:justify-end"><span className="flex items-center gap-1 text-xs font-semibold"><ShieldCheck className="h-4 w-4 text-amber-700" /> Secure enquiry</span><span className="flex items-center gap-1 text-xs font-semibold"><Wifi className="h-4 w-4 text-amber-700" /> Configurable content</span></div></div><p className="mx-auto mt-8 max-w-7xl border-t border-stone-200 pt-5 text-xs text-stone-500">© {new Date().getFullYear()} {HOTEL.name}. {HOTEL.demoNotice}</p></footer>

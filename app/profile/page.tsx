@@ -185,7 +185,7 @@ export default function ProfilePage() {
   if (!ready || !authenticated) {
     return (
       <DashboardLayout>
-        <p className="py-12 text-center text-sm text-slate-500" role="status">Checking your guest account…</p>
+        <p className="py-12 text-center text-sm text-stone-500" role="status">Checking your guest account…</p>
       </DashboardLayout>
     );
   }
@@ -193,20 +193,20 @@ export default function ProfilePage() {
   return (
     <DashboardLayout>
       <div className="mb-8">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-700 text-xs font-semibold mb-2">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold mb-2">
           <Sparkles className="w-3.5 h-3.5" /> Guest Experience
         </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+        <h1 className="font-serif text-3xl sm:text-4xl text-stone-900">
           Account Profile
         </h1>
-        <p className="text-xs sm:text-sm text-slate-500 mt-1">
+        <p className="text-xs sm:text-sm text-stone-500 mt-1">
           Manage your personal details and contact information.
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
         <div className="space-y-6">
-          <div className="bg-white rounded-3xl border border-slate-200/90 p-6 shadow-sm text-center">
+          <div className="bg-white rounded-3xl border border-stone-200/90 p-6 shadow-sm text-center">
             <div className="relative h-24 w-24 mx-auto mb-4">
               {avatarPreview || avatarUrl ? (
                 <Image
@@ -215,10 +215,10 @@ export default function ProfilePage() {
                   height={96}
                   unoptimized
                   alt={`${fullName || 'Guest'} profile`}
-                  className="h-24 w-24 rounded-full object-cover ring-4 ring-sky-100 shadow-md"
+                  className="h-24 w-24 rounded-full object-cover ring-4 ring-amber-100 shadow-md"
                 />
               ) : (
-                <div className="flex h-24 w-24 items-center justify-center rounded-full bg-sky-100 text-2xl font-bold text-sky-700 ring-4 ring-sky-100 shadow-md">
+                <div className="flex h-24 w-24 items-center justify-center rounded-full bg-amber-100 text-2xl font-bold text-amber-800 ring-4 ring-amber-100 shadow-md">
                   {initials}
                 </div>
               )}
@@ -230,35 +230,35 @@ export default function ProfilePage() {
                 }}
                 aria-label="Change profile photo"
                 title="Change profile photo"
-                className="absolute bottom-0 right-0 flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-sky-600 text-white shadow transition hover:bg-sky-700"
+                className="absolute bottom-0 right-0 flex h-9 w-9 items-center justify-center rounded-full border-2 border-white bg-amber-700 text-white shadow transition hover:bg-amber-800"
               >
                 <Camera className="h-4 w-4" />
               </button>
             </div>
-            {avatarBusy && <p className="mb-2 text-xs text-sky-700" role="status">Saving photo…</p>}
+            {avatarBusy && <p className="mb-2 text-xs text-amber-800" role="status">Saving photo…</p>}
             {avatarError && <p className="mb-3 text-xs font-medium text-rose-700" role="alert">{avatarError}</p>}
-            <h3 className="text-lg font-bold text-slate-900">{fullName || 'Guest'}</h3>
-            <p className="text-xs text-slate-500">{currentProfile.email || 'Add your email address'}</p>
-            <div className="mt-4 pt-4 border-t border-slate-100 text-xs text-slate-500">
+            <h3 className="text-lg font-bold text-stone-900">{fullName || 'Guest'}</h3>
+            <p className="text-xs text-stone-500">{currentProfile.email || 'Add your email address'}</p>
+            <div className="mt-4 pt-4 border-t border-stone-100 text-xs text-stone-500">
               Your profile details appear here after you save them.
             </div>
           </div>
 
-          <div className="bg-white rounded-3xl border border-slate-200/90 p-6 shadow-sm">
-            <h4 className="text-sm font-bold text-slate-900 mb-3 flex items-center gap-2">
-              <Lock className="w-4 h-4 text-sky-600" /> Profile Storage
+          <div className="bg-white rounded-3xl border border-stone-200/90 p-6 shadow-sm">
+            <h4 className="text-sm font-bold text-stone-900 mb-3 flex items-center gap-2">
+              <Lock className="w-4 h-4 text-amber-700" /> Profile Storage
             </h4>
-            <p className="text-xs leading-relaxed text-slate-500">
+            <p className="text-xs leading-relaxed text-stone-500">
               Profile details are saved in this browser&apos;s local storage. They are not synced to other devices or used for authentication.
             </p>
           </div>
         </div>
 
         <div className="lg:col-span-2 space-y-6">
-          <form onSubmit={handleSave} className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-sm space-y-6">
-            <h3 className="text-base font-bold text-slate-900">Personal Information</h3>
+          <form onSubmit={handleSave} className="bg-white rounded-3xl border border-stone-200/90 p-6 sm:p-8 shadow-sm space-y-6">
+            <h3 className="text-base font-bold text-stone-900">Personal Information</h3>
 
-            {!ready && <p className="text-xs text-slate-500" role="status">Loading saved profile…</p>}
+            {!ready && <p className="text-xs text-stone-500" role="status">Loading saved profile…</p>}
             {storageError && (
               <div role="alert" className="p-3 bg-rose-50 text-rose-700 text-xs font-semibold rounded-xl">
                 Could not load your guest profile: {storageError}
@@ -277,30 +277,30 @@ export default function ProfilePage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label htmlFor="firstName" className="text-xs font-semibold text-slate-700 block mb-1">First Name</label>
+                <label htmlFor="firstName" className="text-xs font-semibold text-stone-700 block mb-1">First Name</label>
                 <div className="relative">
-                  <User className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <User className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
                   <input
                     id="firstName"
                     type="text"
                     value={currentProfile.firstName}
                     onChange={(e) => updateField('firstName', e.target.value)}
                     autoComplete="given-name"
-                    className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                    className="w-full pl-9 pr-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                   />
                 </div>
               </div>
               <div>
-                <label htmlFor="lastName" className="text-xs font-semibold text-slate-700 block mb-1">Last Name</label>
+                <label htmlFor="lastName" className="text-xs font-semibold text-stone-700 block mb-1">Last Name</label>
                 <div className="relative">
-                  <User className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <User className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
                   <input
                     id="lastName"
                     type="text"
                     value={currentProfile.lastName}
                     onChange={(e) => updateField('lastName', e.target.value)}
                     autoComplete="family-name"
-                    className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                    className="w-full pl-9 pr-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                   />
                 </div>
               </div>
@@ -308,9 +308,9 @@ export default function ProfilePage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label htmlFor="email" className="text-xs font-semibold text-slate-700 block mb-1">Email</label>
+                <label htmlFor="email" className="text-xs font-semibold text-stone-700 block mb-1">Email</label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <Mail className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
                   <input
                     id="email"
                     type="email"
@@ -318,58 +318,58 @@ export default function ProfilePage() {
                     readOnly
                     autoComplete="email"
                     aria-describedby="email-help"
-                    className="w-full pl-9 pr-3 py-2 bg-slate-100 border border-slate-200 rounded-xl text-xs font-medium text-slate-500"
+                    className="w-full pl-9 pr-3 py-2 bg-stone-100 border border-stone-200 rounded-xl text-xs font-medium text-stone-500"
                   />
                 </div>
-                <p id="email-help" className="mt-1 text-[11px] text-slate-500">Your sign-in email is managed by your account.</p>
+                <p id="email-help" className="mt-1 text-[11px] text-stone-500">Your sign-in email is managed by your account.</p>
               </div>
               <div>
-                <label htmlFor="phone" className="text-xs font-semibold text-slate-700 block mb-1">Phone Number</label>
+                <label htmlFor="phone" className="text-xs font-semibold text-stone-700 block mb-1">Phone Number</label>
                 <div className="relative">
-                  <Phone className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                  <Phone className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
                   <input
                     id="phone"
                     type="tel"
                     value={currentProfile.phone}
                     onChange={(e) => updateField('phone', e.target.value)}
                     autoComplete="tel"
-                    className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                    className="w-full pl-9 pr-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                   />
                 </div>
               </div>
             </div>
 
             <div>
-              <label htmlFor="address" className="text-xs font-semibold text-slate-700 block mb-1">Residential Address</label>
+              <label htmlFor="address" className="text-xs font-semibold text-stone-700 block mb-1">Residential Address</label>
               <div className="relative">
-                <MapPin className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <MapPin className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
                 <input
                   id="address"
                   type="text"
                   value={currentProfile.address}
                   onChange={(e) => updateField('address', e.target.value)}
                   autoComplete="street-address"
-                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                  className="w-full pl-9 pr-3 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                 />
               </div>
             </div>
 
-            <div className="pt-4 border-t border-slate-100 flex justify-end">
+            <div className="pt-4 border-t border-stone-100 flex justify-end">
               <button
                 type="submit"
                 disabled={!ready}
-                className="px-6 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs rounded-xl shadow transition disabled:cursor-not-allowed disabled:opacity-60"
+                className="px-6 py-2.5 bg-amber-700 hover:bg-amber-800 text-white font-bold text-xs rounded-xl shadow transition disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Save Profile Changes
               </button>
             </div>
           </form>
 
-          <div className="bg-white rounded-3xl border border-slate-200/90 p-6 shadow-sm">
-            <h3 className="text-base font-bold text-slate-900 mb-2 flex items-center gap-2">
-              <Lock className="w-4 h-4 text-sky-600" /> Security & Access
+          <div className="bg-white rounded-3xl border border-stone-200/90 p-6 shadow-sm">
+            <h3 className="text-base font-bold text-stone-900 mb-2 flex items-center gap-2">
+              <Lock className="w-4 h-4 text-amber-700" /> Security & Access
             </h3>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-stone-500">
               Your password is managed securely by Supabase. Sign out to end this guest session on this device.
             </p>
             {signOutError && <p role="alert" className="mt-3 text-xs font-semibold text-rose-700">{signOutError}</p>}
@@ -379,7 +379,7 @@ export default function ProfilePage() {
                 setSignOutError(null);
                 setSignOutDialogOpen(true);
               }}
-              className="mt-4 inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-700 transition hover:bg-slate-50"
+              className="mt-4 inline-flex items-center gap-2 rounded-xl border border-stone-200 px-4 py-2 text-xs font-bold text-stone-700 transition hover:bg-stone-50"
             >
               <LogOut className="h-4 w-4" /> Sign Out
             </button>
@@ -389,22 +389,22 @@ export default function ProfilePage() {
 
       {signOutDialogOpen && (
         <div
-          className="fixed inset-0 z-60 flex items-center justify-center bg-slate-950/60 p-4"
+          className="fixed inset-0 z-60 flex items-center justify-center bg-stone-950/60 p-4"
           role="presentation"
           onMouseDown={(event) => {
             if (event.target === event.currentTarget && !signingOut) setSignOutDialogOpen(false);
           }}
         >
           <section role="dialog" aria-modal="true" aria-labelledby="sign-out-dialog-title" className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
-            <h2 id="sign-out-dialog-title" className="text-base font-bold text-slate-900">Sign out of your account?</h2>
-            <p className="mt-2 text-sm text-slate-600">You will need to sign in again to access your guest account and reservations.</p>
+            <h2 id="sign-out-dialog-title" className="text-base font-bold text-stone-900">Sign out of your account?</h2>
+            <p className="mt-2 text-sm text-stone-600">You will need to sign in again to access your guest account and reservations.</p>
             {signOutError && <p role="alert" className="mt-4 rounded-lg bg-rose-50 p-3 text-xs font-semibold text-rose-700">{signOutError}</p>}
             <div className="mt-6 flex justify-end gap-3">
               <button
                 type="button"
                 onClick={() => setSignOutDialogOpen(false)}
                 disabled={signingOut}
-                className="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-bold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                className="rounded-xl border border-stone-200 px-4 py-2.5 text-xs font-bold text-stone-700 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Cancel
               </button>
@@ -422,13 +422,13 @@ export default function ProfilePage() {
       )}
 
       {photoMenuOpen && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center bg-slate-950/60 p-4" role="presentation" onMouseDown={(event) => {
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-stone-950/60 p-4" role="presentation" onMouseDown={(event) => {
           if (event.target === event.currentTarget) setPhotoMenuOpen(false);
         }}>
           <section role="dialog" aria-modal="true" aria-labelledby="photo-dialog-title" className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-2xl">
             <div className="mb-5 flex items-center justify-between">
-              <h2 id="photo-dialog-title" className="text-base font-bold text-slate-900">Change profile photo</h2>
-              <button type="button" onClick={() => setPhotoMenuOpen(false)} aria-label="Close photo options" className="rounded-lg p-2 text-slate-500 hover:bg-slate-100">
+              <h2 id="photo-dialog-title" className="text-base font-bold text-stone-900">Change profile photo</h2>
+              <button type="button" onClick={() => setPhotoMenuOpen(false)} aria-label="Close photo options" className="rounded-lg p-2 text-stone-500 hover:bg-stone-100">
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -437,18 +437,18 @@ export default function ProfilePage() {
               <button
                 type="button"
                 onClick={() => uploadInputRef.current?.click()}
-                className="flex items-center gap-3 rounded-xl border border-slate-200 p-4 text-left transition hover:border-sky-300 hover:bg-sky-50"
+                className="flex items-center gap-3 rounded-xl border border-stone-200 p-4 text-left transition hover:border-amber-200 hover:bg-amber-50"
               >
-                <ImagePlus className="h-5 w-5 text-sky-600" />
-                <span><strong className="block text-sm text-slate-800">Upload from gallery</strong><small className="text-xs text-slate-500">Choose an image saved on your device</small></span>
+                <ImagePlus className="h-5 w-5 text-amber-700" />
+                <span><strong className="block text-sm text-stone-800">Upload from gallery</strong><small className="text-xs text-stone-500">Choose an image saved on your device</small></span>
               </button>
               <button
                 type="button"
                 onClick={() => void startCamera()}
-                className="flex items-center gap-3 rounded-xl border border-slate-200 p-4 text-left transition hover:border-sky-300 hover:bg-sky-50"
+                className="flex items-center gap-3 rounded-xl border border-stone-200 p-4 text-left transition hover:border-amber-200 hover:bg-amber-50"
               >
-                <Camera className="h-5 w-5 text-sky-600" />
-                <span><strong className="block text-sm text-slate-800">Take a photo</strong><small className="text-xs text-slate-500">Use your device camera</small></span>
+                <Camera className="h-5 w-5 text-amber-700" />
+                <span><strong className="block text-sm text-stone-800">Take a photo</strong><small className="text-xs text-stone-500">Use your device camera</small></span>
               </button>
               <input
                 ref={uploadInputRef}
@@ -464,18 +464,18 @@ export default function ProfilePage() {
       )}
 
       {cameraOpen && (
-        <div className="fixed inset-0 z-70 flex items-center justify-center bg-slate-950/80 p-4">
+        <div className="fixed inset-0 z-70 flex items-center justify-center bg-stone-950/80 p-4">
           <section role="dialog" aria-modal="true" aria-labelledby="camera-dialog-title" className="w-full max-w-lg rounded-2xl bg-white p-5 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
-              <h2 id="camera-dialog-title" className="text-base font-bold text-slate-900">Take a profile photo</h2>
-              <button type="button" onClick={closeCamera} aria-label="Close camera" className="rounded-lg p-2 text-slate-500 hover:bg-slate-100">
+              <h2 id="camera-dialog-title" className="text-base font-bold text-stone-900">Take a profile photo</h2>
+              <button type="button" onClick={closeCamera} aria-label="Close camera" className="rounded-lg p-2 text-stone-500 hover:bg-stone-100">
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <video ref={videoRef} autoPlay playsInline className="max-h-[60vh] w-full rounded-xl bg-slate-950 object-cover" />
+            <video ref={videoRef} autoPlay playsInline className="max-h-[60vh] w-full rounded-xl bg-stone-950 object-cover" />
             <div className="mt-4 flex justify-end gap-3">
-              <button type="button" onClick={closeCamera} className="rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50">Cancel</button>
-              <button type="button" onClick={() => void capturePhoto()} disabled={avatarBusy} className="inline-flex items-center gap-2 rounded-xl bg-sky-600 px-4 py-2 text-xs font-bold text-white hover:bg-sky-700 disabled:opacity-60">
+              <button type="button" onClick={closeCamera} className="rounded-xl border border-stone-200 px-4 py-2 text-xs font-bold text-stone-700 hover:bg-stone-50">Cancel</button>
+              <button type="button" onClick={() => void capturePhoto()} disabled={avatarBusy} className="inline-flex items-center gap-2 rounded-xl bg-amber-700 px-4 py-2 text-xs font-bold text-white hover:bg-amber-800 disabled:opacity-60">
                 <Camera className="h-4 w-4" /> {avatarBusy ? 'Saving…' : 'Capture photo'}
               </button>
             </div>

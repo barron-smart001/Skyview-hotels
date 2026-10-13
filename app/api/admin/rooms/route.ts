@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { requireStaff } from '@/lib/auth';
+import { requireAdmin } from '@/lib/auth';
 import { HOTEL } from '@/lib/hotel-config';
 import type { AdminRoom } from '@/types';
 
@@ -7,10 +7,10 @@ type RoomTypeRow = { name: string | null; bed_type: string | null; size_sqft: nu
 
 /** Full room inventory with live status, for staff screens (rooms + housekeeping). */
 export async function GET() {
-  const staff = await requireStaff();
-  if (staff instanceof NextResponse) return staff;
+  const admin = await requireAdmin();
+  if (admin instanceof NextResponse) return admin;
 
-  const { data, error } = await staff.supabase
+  const { data, error } = await admin.supabase
     .from('rooms')
     .select('id, room_number, floor, capacity, price_per_night_ngn, status, images, updated_at, hotel:hotels!inner(slug), room_type:room_types(name, bed_type, size_sqft)')
     .eq('hotel.slug', HOTEL.slug)

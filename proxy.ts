@@ -6,6 +6,8 @@ import { createServerClient } from '@supabase/ssr';
  * Server Components cannot write cookies, so without this an expired access
  * token makes server-side auth checks treat signed-in users as signed out.
  */
+const PROTECTED_PAGES = ['/admin', '/bookings', '/profile', '/services'];
+
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
 
@@ -26,11 +28,20 @@ export async function proxy(request: NextRequest) {
     },
   });
 
-  await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // Dashboard pages are for signed-in users only; API routes answer 401 themselves.
+  const { pathname, search } = request.nextUrl;
+  const isPage = PROTECTED_PAGES.some((base) => pathname === base || pathname.startsWith(`${base}/`));
+  if (!user && isPage) {
+    const signIn = new URL('/sign-in', request.url);
+    signIn.searchParams.set('next', pathname + search);
+    return NextResponse.redirect(signIn);
+  }
   return response;
 }
 
 export const config = {
   // Only routes that read the session on the server; public pages skip this round trip.
-  matcher: ['/admin/:path*', '/api/admin/:path*', '/api/bookings/:path*', '/api/service-requests', '/bookings', '/services'],
+  matcher: ['/admin/:path*', '/api/admin/:path*', '/api/bookings/:path*', '/api/service-requests', '/bookings', '/services', '/profile'],
 };

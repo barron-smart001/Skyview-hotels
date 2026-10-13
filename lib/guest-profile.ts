@@ -19,7 +19,16 @@ export const EMPTY_GUEST_PROFILE: GuestProfile = {
   address: '',
 };
 
+export type GuestRole = 'guest' | 'receptionist' | 'manager' | 'admin';
+
 const PROFILE_CHANGE_EVENT = 'skyview-guest-profile-change';
+
+/** Ends the Supabase session in this browser; callers decide where to navigate next. */
+export async function signOutUser() {
+  const { error } = await createClient().auth.signOut();
+  if (error) throw error;
+  window.dispatchEvent(new Event(PROFILE_CHANGE_EVENT));
+}
 
 export async function saveGuestProfile(profile: GuestProfile) {
   const supabase = createClient();
@@ -81,6 +90,7 @@ export function useGuestProfile() {
   const [ready, setReady] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [role, setRole] = useState<GuestRole | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -106,6 +116,7 @@ export function useGuestProfile() {
         if (!user) {
           if (!active) return;
           setAuthenticated(false);
+          setRole(null);
           setProfile(EMPTY_GUEST_PROFILE);
           setAvatarUrl(null);
           setError(null);
@@ -119,12 +130,11 @@ export function useGuestProfile() {
           .eq('id', user.id)
           .maybeSingle();
         if (profileError) throw profileError;
-        if (!data || data.role !== 'guest') {
-          throw new Error('A guest profile could not be found for this account.');
-        }
+        if (!data) throw new Error('A profile could not be found for this account.');
 
         if (!active) return;
         setAuthenticated(true);
+        setRole(data.role as GuestRole);
         setProfile({
           firstName: data.first_name,
           lastName: data.last_name,
@@ -163,5 +173,5 @@ export function useGuestProfile() {
     };
   }, []);
 
-  return { profile, avatarUrl, ready, authenticated, error };
+  return { profile, avatarUrl, ready, authenticated, role, isAdmin: role === 'admin', error };
 }

@@ -68,3 +68,9 @@ export interface AdminRoom {
   image: string | null;
   updatedAt: string | null;
 }
+
+/** The signed-in administrator, shown in the admin portal shell. */
+export interface AdminIdentity {
+  name: string;
+  email: string;
+}

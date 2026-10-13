@@ -99,13 +99,13 @@ export default function ServicesPage() {
   return (
     <DashboardLayout>
       <div className="mb-8">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 text-sky-700 text-xs font-semibold mb-2">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-semibold mb-2">
           <Sparkles className="w-3.5 h-3.5" /> Curated Experiences
         </div>
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+        <h1 className="font-serif text-3xl sm:text-4xl text-stone-900">
           Hotel Services & Concierge
         </h1>
-        <p className="text-xs sm:text-sm text-slate-500 mt-1">
+        <p className="text-xs sm:text-sm text-stone-500 mt-1">
           From rejuvenating spa treatments to bespoke dining and private chauffeurs, enhance your luxury stay.
         </p>
       </div>
@@ -118,8 +118,8 @@ export default function ServicesPage() {
             onClick={() => setSelectedCategory(cat)}
             className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition ${
               selectedCategory === cat
-                ? 'bg-sky-600 text-white shadow-sm'
-                : 'bg-white border border-slate-200/80 text-slate-600 hover:bg-slate-50'
+                ? 'bg-amber-700 text-white shadow-sm'
+                : 'bg-white border border-stone-200/80 text-stone-600 hover:bg-stone-50'
             }`}
           >
             {cat === 'all' ? 'All Services' : cat}
@@ -127,7 +127,7 @@ export default function ServicesPage() {
         ))}
       </div>
 
-      {servicesLoading && <p className="mb-6 text-sm text-slate-500">Loading services…</p>}
+      {servicesLoading && <p className="mb-6 text-sm text-stone-500">Loading services…</p>}
       {!servicesLoading && !selectedService && error && (
         <p role="alert" className="mb-6 rounded-xl bg-rose-50 p-3 text-xs font-semibold text-rose-700">{error}</p>
       )}
@@ -137,10 +137,10 @@ export default function ServicesPage() {
         {filteredServices.map((service) => (
           <div
             key={service.id}
-            className="bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col justify-between group"
+            className="bg-white rounded-2xl border border-stone-200/80 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col justify-between group"
           >
             <div>
-              <div className="relative h-44 w-full overflow-hidden bg-slate-100">
+              <div className="relative h-44 w-full overflow-hidden bg-stone-100">
                 {service.image ? (
                   <Image
                     src={service.image}
@@ -150,37 +150,37 @@ export default function ServicesPage() {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                   ) : null}
-                <span className="absolute top-3 left-3 bg-slate-900/70 backdrop-blur-md text-white text-[11px] font-medium px-2.5 py-0.5 rounded-md">
+                <span className="absolute top-3 left-3 bg-stone-900/70 backdrop-blur-md text-white text-[11px] font-medium px-2.5 py-0.5 rounded-md">
                   {service.category}
                 </span>
                 {service.duration && (
-                  <span className="absolute bottom-3 right-3 bg-white/90 backdrop-blur-md text-slate-700 text-[11px] font-semibold px-2 py-0.5 rounded-md flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-sky-600" /> {service.duration}
+                  <span className="absolute bottom-3 right-3 bg-white/90 backdrop-blur-md text-stone-700 text-[11px] font-semibold px-2 py-0.5 rounded-md flex items-center gap-1">
+                    <Clock className="w-3 h-3 text-amber-700" /> {service.duration}
                   </span>
                 )}
               </div>
 
               <div className="p-4">
-                <h3 className="text-sm font-bold text-slate-900 group-hover:text-sky-600 transition mb-1">
+                <h3 className="text-sm font-bold text-stone-900 group-hover:text-amber-700 transition mb-1">
                   {service.name}
                 </h3>
-                <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                <p className="text-xs text-stone-500 line-clamp-2 leading-relaxed">
                   {service.description}
                 </p>
               </div>
             </div>
 
-            <div className="p-4 pt-2 border-t border-slate-100 flex items-center justify-between">
+            <div className="p-4 pt-2 border-t border-stone-100 flex items-center justify-between">
               <div>
-                <span className="text-[11px] text-slate-400 block font-medium">Pricing</span>
-                <span className="text-sm font-extrabold text-slate-900">
+                <span className="text-[11px] text-stone-400 block font-medium">Pricing</span>
+                <span className="text-sm font-extrabold text-stone-900">
                   {formatCurrency(service.price)}
                 </span>
               </div>
 
               <button
                 onClick={() => setSelectedService(service)}
-                className="px-3 py-1.5 bg-sky-50 text-sky-600 hover:bg-sky-600 hover:text-white rounded-xl text-xs font-semibold transition flex items-center gap-1"
+                className="px-3 py-1.5 bg-amber-50 text-amber-700 hover:bg-amber-700 hover:text-white rounded-xl text-xs font-semibold transition flex items-center gap-1"
               >
                 <Plus className="w-3.5 h-3.5" /> Request
               </button>
@@ -190,38 +190,38 @@ export default function ServicesPage() {
       </div>
 
       {/* Guest Service Requests History */}
-      <div className="bg-white rounded-2xl border border-slate-200/90 p-6 shadow-sm">
-        <h3 className="text-base font-bold text-slate-900 mb-1 flex items-center gap-2">
-          <MessageSquare className="w-4 h-4 text-sky-600" /> Active Service Requests
+      <div className="bg-white rounded-2xl border border-stone-200/90 p-6 shadow-sm">
+        <h3 className="text-base font-bold text-stone-900 mb-1 flex items-center gap-2">
+          <MessageSquare className="w-4 h-4 text-amber-700" /> Active Service Requests
         </h3>
-        <p className="text-xs text-slate-500 mb-4">Track orders dispatched to your suite</p>
+        <p className="text-xs text-stone-500 mb-4">Track orders dispatched to your suite</p>
 
-        {requestsState === 'loading' && <p className="py-4 text-xs text-slate-500">Loading your requests…</p>}
+        {requestsState === 'loading' && <p className="py-4 text-xs text-stone-500">Loading your requests…</p>}
         {requestsState === 'signed-out' && (
-          <p className="py-4 text-xs text-slate-500">
-            <Link href="/sign-in?next=/services" className="font-semibold text-sky-600">Sign in</Link> to request services and track them here.
+          <p className="py-4 text-xs text-stone-500">
+            <Link href="/sign-in?next=/services" className="font-semibold text-amber-700">Sign in</Link> to request services and track them here.
           </p>
         )}
         {requestsState === 'error' && <p className="py-4 text-xs text-rose-600">Your requests could not be loaded right now.</p>}
         {requestsState === 'ready' && requests.length === 0 && (
-          <p className="py-4 text-xs text-slate-500">You have no service requests yet.</p>
+          <p className="py-4 text-xs text-stone-500">You have no service requests yet.</p>
         )}
 
-        <div className="divide-y divide-slate-100">
+        <div className="divide-y divide-stone-100">
           {requests.map((req) => (
             <div key={req.id} className="py-3 flex items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2">
-                  <h4 className="text-xs sm:text-sm font-bold text-slate-800">{req.serviceName}</h4>
-                  <span className="text-[11px] text-slate-400">• {req.category}</span>
+                  <h4 className="text-xs sm:text-sm font-bold text-stone-800">{req.serviceName}</h4>
+                  <span className="text-[11px] text-stone-400">• {req.category}</span>
                 </div>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Scheduled for: <span className="font-medium text-slate-700">{req.requestedTime}</span>
+                <p className="text-xs text-stone-500 mt-0.5">
+                  Scheduled for: <span className="font-medium text-stone-700">{req.requestedTime}</span>
                   {req.notes && ` (${req.notes})`}
                 </p>
               </div>
 
-              <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-sky-50 text-sky-700">
+              <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-50 text-amber-800">
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 {req.status}
               </span>
@@ -232,14 +232,14 @@ export default function ServicesPage() {
 
       {/* Service Request Modal */}
       {selectedService && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl p-6 border border-slate-100">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl p-6 border border-stone-100">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-base font-bold text-slate-900">Request {selectedService.name}</h3>
+              <h3 className="text-base font-bold text-stone-900">Request {selectedService.name}</h3>
               <button
                 onClick={closeModal}
                 aria-label="Close"
-                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100"
+                className="p-1.5 text-stone-400 hover:text-stone-600 rounded-full hover:bg-stone-100"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -253,36 +253,36 @@ export default function ServicesPage() {
               <form onSubmit={handleRequestSubmit} className="space-y-4">
                 {error && <p role="alert" className="rounded-xl bg-rose-50 p-3 text-xs font-semibold text-rose-700">{error}</p>}
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 block mb-1">Preferred Time / Delivery</label>
+                  <label className="text-xs font-semibold text-stone-700 block mb-1">Preferred Time / Delivery</label>
                   <input
                     type="text"
                     value={time}
                     onChange={(e) => setTime(e.target.value)}
                     required
-                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                    className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 block mb-1">Special Instructions</label>
+                  <label className="text-xs font-semibold text-stone-700 block mb-1">Special Instructions</label>
                   <textarea
                     rows={3}
                     placeholder="Dietary preferences, specific therapist, luggage details, etc."
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                    className="w-full px-3.5 py-2 bg-stone-50 border border-stone-200 rounded-xl text-xs focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                   />
                 </div>
 
-                <div className="p-3 bg-slate-50 rounded-xl flex justify-between text-xs font-semibold">
-                  <span className="text-slate-600">Charge to Room Folio:</span>
-                  <span className="text-sky-600 font-bold">{formatCurrency(selectedService.price)}</span>
+                <div className="p-3 bg-stone-50 rounded-xl flex justify-between text-xs font-semibold">
+                  <span className="text-stone-600">Charge to Room Folio:</span>
+                  <span className="text-amber-700 font-bold">{formatCurrency(selectedService.price)}</span>
                 </div>
 
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-2.5 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-xs font-bold shadow transition flex items-center justify-center gap-2"
+                  className="w-full py-2.5 bg-amber-700 hover:bg-amber-800 text-white rounded-xl text-xs font-bold shadow transition flex items-center justify-center gap-2"
                 >
                   <Send className="w-3.5 h-3.5" />
                   {isSubmitting ? 'Sending Request...' : 'Confirm Request'}
