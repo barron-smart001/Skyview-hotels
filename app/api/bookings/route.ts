@@ -33,6 +33,17 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  // Only guests with an account may book.
+  let sessionUser: { id: string } | null = null;
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    sessionUser = user;
+  } catch {
+    sessionUser = null;
+  }
+  if (!sessionUser) return NextResponse.json({ error: 'Please sign in or create an account to book a room.' }, { status: 401 });
+
   let body: unknown;
   try {
     body = await request.json();
@@ -106,15 +117,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Link the booking to the guest account when signed in so it appears under "My Bookings".
-    let userId: string | null = null;
-    try {
-      const supabase = await createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      userId = user?.id ?? null;
-    } catch {
-      userId = null;
-    }
+    const userId = sessionUser.id;
 
     const { data: booking, error: insertError } = await admin
       .from('bookings')

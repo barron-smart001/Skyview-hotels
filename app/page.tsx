@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion, useScroll, useSpring, useTransform } from 'framer-motion';
 import {
   AirVent, ArrowRight, BedDouble, Car, Cast, ChevronRight, Coffee, Clock3, MapPin, Router, ShieldCheck,
   Sparkles, Star, Wifi,
@@ -23,11 +23,31 @@ const images = {
   room: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=1200&q=85',
 };
 
+const heroSlides = [
+  { src: images.hero, alt: 'Hotel exterior at dusk' },
+  { src: images.pool, alt: 'Hotel pool area' },
+  { src: images.room, alt: 'Comfortable hotel suite' },
+  { src: images.dining, alt: 'Hotel dining space' },
+];
+
 const facilityIcons = [Wifi, Sparkles, BedDouble, Car, Coffee, AirVent, Router, Cast] as const;
 
 export default function Home() {
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
   const reduceMotion = useReducedMotion();
+  const [slide, setSlide] = useState(0);
+  const heroRef = useRef<HTMLElement>(null);
+  const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
+  const heroShift = useTransform(scrollYProgress, [0, 1], ['0%', reduceMotion ? '0%' : '18%']);
+  const heroFade = useTransform(scrollYProgress, [0, 0.8], [1, reduceMotion ? 1 : 0]);
+  const { scrollYProgress: pageProgress } = useScroll();
+  const progress = useSpring(pageProgress, { stiffness: 120, damping: 30 });
+
+  useEffect(() => {
+    if (reduceMotion) return;
+    const timer = setInterval(() => setSlide((current) => (current + 1) % heroSlides.length), 5500);
+    return () => clearInterval(timer);
+  }, [reduceMotion]);
   // Same live catalog as /rooms, so room IDs and prices match the booking flow.
   const { rooms } = useRoomCatalog();
   const featured = rooms.filter((room) => room.featured);
@@ -36,11 +56,30 @@ export default function Home() {
 
   return (
     <main id="home" className="overflow-hidden bg-[#faf8f4] text-stone-900">
-      <section className="relative min-h-[720px] bg-stone-950 sm:min-h-[800px]">
-        <Image src={images.hero} alt="Hotel exterior at dusk" width={2200} height={1400} sizes="100vw" priority className="absolute inset-0 h-full w-full object-cover opacity-75" />
+      <motion.div style={{ scaleX: progress }} className="fixed inset-x-0 top-0 z-[60] h-0.5 origin-left bg-amber-300" />
+      <section ref={heroRef} className="relative min-h-[720px] overflow-hidden bg-stone-950 sm:min-h-[800px]">
+        <motion.div style={{ y: heroShift }} className="absolute inset-x-0 -top-10 bottom-0">
+          <AnimatePresence initial={false}>
+            <motion.div
+              key={slide}
+              initial={{ opacity: 0, scale: 1.08 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ opacity: { duration: 1.4 }, scale: { duration: 7, ease: 'easeOut' } }}
+              className="absolute inset-0"
+            >
+              <Image src={heroSlides[slide].src} alt={heroSlides[slide].alt} width={2200} height={1400} sizes="100vw" priority={slide === 0} className="h-full w-full object-cover opacity-75" />
+            </motion.div>
+          </AnimatePresence>
+        </motion.div>
         <div className="absolute inset-0 bg-linear-to-b from-stone-950/80 via-stone-950/25 to-stone-950/85" />
         <SiteHeader />
-        <motion.div {...reveal} className="relative mx-auto flex min-h-[720px] max-w-7xl flex-col justify-end px-5 pb-20 pt-36 sm:min-h-[800px] sm:px-8 lg:px-10">
+        <div className="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 gap-2">
+          {heroSlides.map((item, index) => (
+            <button key={item.src} type="button" aria-label={`Show slide ${index + 1}`} onClick={() => setSlide(index)} className={`h-1.5 rounded-full transition-all ${index === slide ? 'w-8 bg-amber-200' : 'w-3 bg-white/50 hover:bg-white/80'}`} />
+          ))}
+        </div>
+        <motion.div style={{ opacity: heroFade }} {...reveal} className="relative mx-auto flex min-h-[720px] max-w-7xl flex-col justify-end px-5 pb-20 pt-36 sm:min-h-[800px] sm:px-8 lg:px-10">
           <p className="mb-5 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.28em] text-amber-200"><span className="h-px w-10 bg-amber-200" /> Hotel website demonstration</p>
           <h1 className="max-w-4xl font-serif text-5xl leading-[0.98] text-white sm:text-7xl lg:text-8xl">Experience Comfort.<br />Enjoy Every Moment.</h1>
           <p className="mt-7 max-w-xl text-base leading-relaxed text-stone-100 sm:text-lg">Discover a welcoming stay with comfortable accommodation, relaxing facilities, and convenient service.</p>

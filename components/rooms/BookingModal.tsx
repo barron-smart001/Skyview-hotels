@@ -1,6 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { createClient } from '@/lib/supabase/client';
 import Image from 'next/image';
 import { Room } from '@/types';
 import { formatCurrency } from '@/lib/utils';
@@ -24,6 +26,20 @@ export function BookingModal({ room, onClose, onSuccess }: BookingModalProps) {
   const [confirmed, setConfirmed] = useState(false);
   const [bookingRef, setBookingRef] = useState('');
   const [error, setError] = useState('');
+
+  const [signedIn, setSignedIn] = useState<boolean | null>(null);
+  const roomId = room?.id;
+
+  useEffect(() => {
+    if (!roomId) return;
+    let active = true;
+    createClient().auth.getUser().then(({ data }) => {
+      if (active) setSignedIn(Boolean(data.user));
+    }).catch(() => {
+      if (active) setSignedIn(false);
+    });
+    return () => { active = false; };
+  }, [roomId]);
 
   if (!room) return null;
 
@@ -94,7 +110,18 @@ export function BookingModal({ room, onClose, onSuccess }: BookingModalProps) {
           </button>
         </div>
 
-        {confirmed ? (
+        {signedIn === false ? (
+          <div className="p-8 text-center space-y-4">
+            <h4 className="text-xl font-bold text-stone-900">Sign in to book</h4>
+            <p className="text-sm text-stone-600">You need an account to book a room. Please sign in or create one to continue.</p>
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+              <Link href="/sign-in?next=/rooms" className="rounded-full bg-stone-900 px-6 py-3 text-sm font-bold text-white hover:bg-amber-800">Sign in</Link>
+              <Link href="/sign-up" className="rounded-full border border-stone-300 px-6 py-3 text-sm font-bold text-stone-800 hover:bg-stone-50">Create account</Link>
+            </div>
+          </div>
+        ) : signedIn === null ? (
+          <div className="p-8 text-center text-sm text-stone-500">Checking your account…</div>
+        ) : confirmed ? (
           <div className="p-8 text-center space-y-5 overflow-y-auto">
             <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto ring-8 ring-emerald-50">
               <CheckCircle2 className="w-10 h-10" />
