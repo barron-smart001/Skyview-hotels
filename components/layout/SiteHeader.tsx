@@ -12,7 +12,7 @@ const links = [
   { href: '#facilities', label: 'Facilities' },
   { href: '#about', label: 'About' },
   { href: '#gallery', label: 'Gallery' },
-  { href: '#contact', label: 'Contact' },
+  { href: '#contact-us', label: 'Contact' },
 ];
 
 export function SiteHeader() {

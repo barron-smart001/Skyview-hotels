@@ -5,10 +5,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion, useReducedMotion } from 'framer-motion';
 import {
-  ArrowRight, BedDouble, Car, ChevronRight, Clock3, MapPin, ShieldCheck,
+  AirVent, ArrowRight, BedDouble, Car, Cast, ChevronRight, Coffee, Clock3, MapPin, Router, ShieldCheck,
   Sparkles, Star, Wifi,
 } from 'lucide-react';
 import { SiteHeader } from '@/components/layout/SiteHeader';
+import { ContactSection } from '@/components/contact/ContactSection';
 import { BookingModal } from '@/components/rooms/BookingModal';
 import { HOTEL, FACILITIES } from '@/lib/hotel-config';
 import { useRoomCatalog } from '@/components/rooms/useRoomCatalog';
@@ -22,7 +23,7 @@ const images = {
   room: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&w=1200&q=85',
 };
 
-const facilityIcons = [Wifi, Sparkles, BedDouble, Car] as const;
+const facilityIcons = [Wifi, Sparkles, BedDouble, Car, Coffee, AirVent, Router, Cast] as const;
 
 export default function Home() {
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
@@ -115,6 +116,8 @@ export default function Home() {
       <section id="book" className="mx-5 mb-8 overflow-hidden rounded-3xl bg-stone-900 sm:mx-8 lg:mx-10">
         <div className="mx-auto grid max-w-6xl lg:grid-cols-2"><div className="p-6 text-white sm:p-14"><p className="text-xs font-bold uppercase tracking-[0.22em] text-amber-200">Reservations</p><h2 className="mt-4 font-serif text-4xl sm:text-5xl">Book Your Stay</h2><p className="mt-5 max-w-lg text-sm leading-relaxed text-stone-300">Send a reservation enquiry with your dates and guest details. The hotel can then confirm availability and payment directly.</p><Link href="/rooms" className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-full bg-amber-200 px-6 py-3.5 text-center text-sm font-bold text-stone-950 transition hover:bg-amber-300 sm:w-auto">Start a reservation <ArrowRight className="h-4 w-4" /></Link></div><Image src={images.room} alt="Demo hotel suite" width={1200} height={900} sizes="(min-width: 1024px) 50vw, 100vw" className="h-56 w-full object-cover sm:h-72 lg:h-full" /></div>
       </section>
+
+      <ContactSection />
 
       <footer id="contact" className="border-t border-stone-200 px-5 py-10 sm:px-8 lg:px-10"><div className="mx-auto grid max-w-7xl gap-8 text-sm md:grid-cols-3"><div><p className="font-serif text-2xl">{HOTEL.name}</p><p className="mt-2 text-stone-500">Hotel website demonstration.</p></div><div className="text-stone-600"><p className="flex items-center gap-2"><MapPin className="h-4 w-4 text-amber-700" /> {HOTEL.location}</p><p className="mt-2 flex items-center gap-2"><Clock3 className="h-4 w-4 text-amber-700" /> Contact details to be confirmed by the hotel</p></div><div className="flex gap-4 md:justify-end"><span className="flex items-center gap-1 text-xs font-semibold"><ShieldCheck className="h-4 w-4 text-amber-700" /> Secure enquiry</span><span className="flex items-center gap-1 text-xs font-semibold"><Wifi className="h-4 w-4 text-amber-700" /> Configurable content</span></div></div><p className="mx-auto mt-8 max-w-7xl border-t border-stone-200 pt-5 text-xs text-stone-500">© {new Date().getFullYear()} {HOTEL.name}. {HOTEL.demoNotice}</p></footer>
       <BookingModal room={selectedRoom} onClose={() => setSelectedRoom(null)} onSuccess={() => undefined} />

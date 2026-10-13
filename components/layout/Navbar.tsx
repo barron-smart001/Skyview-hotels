@@ -18,6 +18,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { BrandMark } from '@/components/layout/BrandMark';
+import { SignOutDialog } from './SignOutDialog';
 import { signOutUser, useGuestProfile } from '@/lib/guest-profile';
 
 const NAV_ITEMS = [
@@ -39,12 +40,19 @@ export function Sidebar() {
     ? fullName.split(/\s+/).map((part) => part[0]).join('').slice(0, 2).toUpperCase()
     : 'G';
 
+  const [signOutOpen, setSignOutOpen] = useState(false);
+  const [signOutError, setSignOutError] = useState<string | null>(null);
+
   const handleSignOut = async () => {
     setSigningOut(true);
+    setSignOutError(null);
     try {
       await signOutUser();
+      setSignOutOpen(false);
       router.push('/');
       router.refresh();
+    } catch {
+      setSignOutError('We could not sign you out. Please try again.');
     } finally {
       setSigningOut(false);
     }
@@ -153,7 +161,7 @@ export function Sidebar() {
                 )}
                 {authenticated && (
                   <button
-                    onClick={handleSignOut}
+                    onClick={() => { setSignOutError(null); setSignOutOpen(true); }}
                     disabled={signingOut}
                     className="flex items-center gap-1 text-stone-500 hover:text-rose-600 disabled:opacity-50"
                   >
@@ -165,6 +173,7 @@ export function Sidebar() {
           )}
         </div>
       </aside>
+      <SignOutDialog open={signOutOpen} signingOut={signingOut} error={signOutError} onCancel={() => setSignOutOpen(false)} onConfirm={() => void handleSignOut()} />
     </>
   );
 }

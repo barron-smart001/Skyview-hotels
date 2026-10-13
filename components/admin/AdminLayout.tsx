@@ -11,6 +11,7 @@ import {
   Users,
   CreditCard,
   ConciergeBell,
+  Mail,
   Building2,
   ExternalLink,
   LogOut,
@@ -18,6 +19,7 @@ import {
   X,
 } from 'lucide-react';
 import { BrandMark } from '@/components/layout/BrandMark';
+import { SignOutDialog } from '@/components/layout/SignOutDialog';
 import { signOutUser } from '@/lib/guest-profile';
 import type { AdminIdentity } from '@/types';
 
@@ -27,6 +29,7 @@ const ADMIN_NAV = [
   { label: 'Guests', href: '/admin/guests', icon: Users },
   { label: 'Rooms', href: '/admin/rooms', icon: BedDouble },
   { label: 'Housekeeping', href: '/admin/housekeeping', icon: Brush },
+  { label: 'Messages', href: '/admin/messages', icon: Mail },
   { label: 'Service Requests', href: '/admin/service-requests', icon: ConciergeBell },
   { label: 'Payments', href: '/admin/payments', icon: CreditCard },
   { label: 'Hotel Information', href: '/admin/hotel', icon: Building2 },
@@ -39,12 +42,19 @@ export function AdminLayout({ admin, children }: { admin: AdminIdentity; childre
   const [signingOut, setSigningOut] = useState(false);
   const initials = admin.name.split(/\s+/).map((part) => part[0]).join('').slice(0, 2).toUpperCase() || 'AD';
 
+  const [signOutOpen, setSignOutOpen] = useState(false);
+  const [signOutError, setSignOutError] = useState<string | null>(null);
+
   const handleSignOut = async () => {
     setSigningOut(true);
+    setSignOutError(null);
     try {
       await signOutUser();
+      setSignOutOpen(false);
       router.push('/');
       router.refresh();
+    } catch {
+      setSignOutError('We could not sign you out. Please try again.');
     } finally {
       setSigningOut(false);
     }
@@ -94,7 +104,7 @@ export function AdminLayout({ admin, children }: { admin: AdminIdentity; childre
           <ExternalLink className="w-3.5 h-3.5" /> Website
         </Link>
         <button
-          onClick={handleSignOut}
+          onClick={() => { setSignOutError(null); setSignOutOpen(true); }}
           disabled={signingOut}
           className="py-2 bg-stone-800 hover:bg-rose-950 hover:text-rose-300 text-stone-300 rounded-xl text-[11px] font-semibold flex items-center justify-center gap-1.5 transition disabled:opacity-50"
         >
@@ -153,6 +163,7 @@ export function AdminLayout({ admin, children }: { admin: AdminIdentity; childre
           {children}
         </main>
       </div>
+      <SignOutDialog open={signOutOpen} signingOut={signingOut} error={signOutError} onCancel={() => setSignOutOpen(false)} onConfirm={() => void handleSignOut()} />
     </div>
   );
 }

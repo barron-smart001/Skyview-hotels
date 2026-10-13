@@ -17,4 +17,8 @@ export const FACILITIES = [
   { title: 'Swimming pool', description: 'A refreshing pool setting for guests to enjoy during their stay.' },
   { title: 'Comfortable accommodation', description: 'Room categories and features can be tailored to the property.' },
   { title: 'Guest services', description: 'Reservation support and service options can be configured for the hotel.' },
+  { title: 'Hot drinks (tea and coffee)', description: 'Tea and coffee for guests to enjoy during their stay, to be confirmed with the hotel.' },
+  { title: 'Air conditioning', description: 'Climate control for a comfortable stay, to be confirmed with the hotel.' },
+  { title: 'Broadband communication', description: 'Fast and reliable connectivity, to be confirmed with the hotel.' },
+  { title: 'Chromecast', description: 'Stream your own content to the room television, to be confirmed with the hotel.' },
 ] as const;
