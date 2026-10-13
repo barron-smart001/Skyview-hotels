@@ -38,8 +38,10 @@ export default function Home() {
   const [slide, setSlide] = useState(0);
   const heroRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
-  const heroShift = useTransform(scrollYProgress, [0, 1], ['0%', reduceMotion ? '0%' : '18%']);
-  const heroFade = useTransform(scrollYProgress, [0, 0.8], [1, reduceMotion ? 1 : 0]);
+  const heroShift = useTransform(scrollYProgress, [0, 1], ['0%', reduceMotion ? '0%' : '35%']);
+  const heroFade = useTransform(scrollYProgress, [0, 0.7], [1, reduceMotion ? 1 : 0]);
+  const heroTextY = useTransform(scrollYProgress, [0, 1], ['0px', reduceMotion ? '0px' : '-160px']);
+  const heroScale = useTransform(scrollYProgress, [0, 1], [1, reduceMotion ? 1 : 1.25]);
   const { scrollYProgress: pageProgress } = useScroll();
   const progress = useSpring(pageProgress, { stiffness: 120, damping: 30 });
 
@@ -52,13 +54,13 @@ export default function Home() {
   const { rooms } = useRoomCatalog();
   const featured = rooms.filter((room) => room.featured);
   const suites = (featured.length ? featured : rooms).slice(0, 3);
-  const reveal = reduceMotion ? {} : { initial: { opacity: 0, y: 14 }, whileInView: { opacity: 1, y: 0 }, viewport: { once: true, amount: 0.2 }, transition: { duration: 0.45 } };
+  const reveal = reduceMotion ? {} : { initial: { opacity: 0, y: 70, scale: 0.96 }, whileInView: { opacity: 1, y: 0, scale: 1 }, viewport: { once: true, amount: 0.15 }, transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] as const } };
 
   return (
     <main id="home" className="overflow-hidden bg-[#faf8f4] text-stone-900">
       <motion.div style={{ scaleX: progress }} className="fixed inset-x-0 top-0 z-[60] h-0.5 origin-left bg-amber-300" />
       <section ref={heroRef} className="relative min-h-[720px] overflow-hidden bg-stone-950 sm:min-h-[800px]">
-        <motion.div style={{ y: heroShift }} className="absolute inset-x-0 -top-10 bottom-0">
+        <motion.div style={{ y: heroShift }} className="absolute inset-x-0 -top-10 bottom-0"><motion.div style={{ scale: heroScale }} className="absolute inset-0">
           <AnimatePresence initial={false}>
             <motion.div
               key={slide}
@@ -71,7 +73,7 @@ export default function Home() {
               <Image src={heroSlides[slide].src} alt={heroSlides[slide].alt} width={2200} height={1400} sizes="100vw" priority={slide === 0} className="h-full w-full object-cover opacity-75" />
             </motion.div>
           </AnimatePresence>
-        </motion.div>
+        </motion.div></motion.div>
         <div className="absolute inset-0 bg-linear-to-b from-stone-950/80 via-stone-950/25 to-stone-950/85" />
         <SiteHeader />
         <div className="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 gap-2">
@@ -79,7 +81,7 @@ export default function Home() {
             <button key={item.src} type="button" aria-label={`Show slide ${index + 1}`} onClick={() => setSlide(index)} className={`h-1.5 rounded-full transition-all ${index === slide ? 'w-8 bg-amber-200' : 'w-3 bg-white/50 hover:bg-white/80'}`} />
           ))}
         </div>
-        <motion.div style={{ opacity: heroFade }} {...reveal} className="relative mx-auto flex min-h-[720px] max-w-7xl flex-col justify-end px-5 pb-20 pt-36 sm:min-h-[800px] sm:px-8 lg:px-10">
+        <motion.div style={{ opacity: heroFade, y: heroTextY }} {...reveal} className="relative mx-auto flex min-h-[720px] max-w-7xl flex-col justify-end px-5 pb-20 pt-36 sm:min-h-[800px] sm:px-8 lg:px-10">
           <p className="mb-5 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.28em] text-amber-200"><span className="h-px w-10 bg-amber-200" /> Hotel website demonstration</p>
           <h1 className="max-w-4xl font-serif text-5xl leading-[0.98] text-white sm:text-7xl lg:text-8xl">Experience Comfort.<br />Enjoy Every Moment.</h1>
           <p className="mt-7 max-w-xl text-base leading-relaxed text-stone-100 sm:text-lg">Discover a welcoming stay with comfortable accommodation, relaxing facilities, and convenient service.</p>
