@@ -40,7 +40,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   }
 
   // The caller is already verified as an administrator, so write with the server client.
-  const db = isSupabaseAdminConfigured() ? createAdminClient() : admin.supabase;
+  if (!isSupabaseAdminConfigured()) {
+    return NextResponse.json({ error: 'Server is missing SUPABASE_SERVICE_ROLE_KEY, so room changes cannot be saved.' }, { status: 503 });
+  }
+  const db = createAdminClient();
   const { data, error } = await db
     .from('rooms')
     .update(updates)
@@ -52,7 +55,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     console.error('Room status update failed:', error);
     return NextResponse.json({ error: 'Could not update the room.' }, { status: 500 });
   }
-  if (!data) return NextResponse.json({ error: 'Room not found or not editable.' }, { status: 404 });
+  if (!data) return NextResponse.json({ error: 'Room not found. Refresh the page and try again.' }, { status: 404 });
 
   // Public catalog shows availability, so drop the cached copy right away.
   revalidateTag(ROOMS_CACHE_TAG, { expire: 0 });
