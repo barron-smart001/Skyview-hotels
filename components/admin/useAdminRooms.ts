@@ -47,5 +47,24 @@ export function useAdminRooms() {
     }
   };
 
-  return { rooms, loading, error, updatingId, setStatus };
+  const setPrice = async (id: string, pricePerNight: number) => {
+    setUpdatingId(id);
+    setError('');
+    try {
+      const response = await fetch(`/api/admin/rooms/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pricePerNight }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Could not update the price.');
+      setRooms((prev) => prev.map((room) => (room.id === id ? { ...room, pricePerNight: Number(result.room.price_per_night_ngn), updatedAt: result.room.updated_at } : room)));
+    } catch (updateError) {
+      setError(updateError instanceof Error ? updateError.message : 'Could not update the price.');
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  return { rooms, loading, error, updatingId, setStatus, setPrice };
 }

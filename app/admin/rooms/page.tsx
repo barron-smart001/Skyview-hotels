@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { useAdminRooms } from '@/components/admin/useAdminRooms';
-import { formatCurrency } from '@/lib/utils';
 import { Plus, Search, Edit, Trash2 } from 'lucide-react';
 import type { AdminRoom } from '@/types';
 
@@ -20,6 +19,39 @@ const STATUS_STYLES: Record<AdminRoom['status'], string> = {
   cleaning: 'text-amber-400 border-amber-500/30',
   maintenance: 'text-rose-400 border-rose-500/30',
 };
+
+/** Inline nightly-rate editor. */
+function RoomPrice({ room, saving, onSave }: { room: AdminRoom; saving: boolean; onSave: (id: string, price: number) => Promise<void> }) {
+  const [value, setValue] = useState(String(room.pricePerNight));
+  const price = Number(value);
+  const changed = value !== '' && price !== room.pricePerNight;
+
+  return (
+    <div className="space-y-2 min-w-36">
+      <div className="flex items-center gap-1 rounded-lg border border-stone-800 bg-stone-900 px-2 py-1.5 focus-within:border-amber-500">
+        <span className="text-[11px] text-stone-500">₦</span>
+        <input
+          type="number"
+          min={1}
+          inputMode="numeric"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          aria-label={`Price per night for ${room.name}`}
+          className="w-full bg-transparent text-xs font-bold text-amber-300 focus:outline-none"
+        />
+      </div>
+      {changed && (
+        <button
+          disabled={saving || !Number.isFinite(price) || price <= 0}
+          onClick={() => void onSave(room.id, price)}
+          className="rounded-lg bg-amber-500 px-3 py-1 text-[11px] font-bold text-stone-950 disabled:opacity-50"
+        >
+          {saving ? 'Saving…' : 'Save price'}
+        </button>
+      )}
+    </div>
+  );
+}
 
 /** Lets staff change a room's availability and say why it is out of service. */
 function RoomAvailability({ room, saving, onSave }: { room: AdminRoom; saving: boolean; onSave: (id: string, status: AdminRoom['status'], note?: string) => Promise<void> }) {
@@ -62,7 +94,7 @@ function RoomAvailability({ room, saving, onSave }: { room: AdminRoom; saving: b
 }
 
 export default function AdminRoomsPage() {
-  const { rooms, loading, error, updatingId, setStatus } = useAdminRooms();
+  const { rooms, loading, error, updatingId, setStatus, setPrice } = useAdminRooms();
   const [search, setSearch] = useState('');
 
   const query = search.toLowerCase();
@@ -149,7 +181,9 @@ export default function AdminRoomsPage() {
                       <div>{room.capacity} Guests</div>
                       <div className="text-[11px] text-stone-500">{room.bedType}</div>
                     </td>
-                    <td className="p-4 font-bold text-amber-300">{formatCurrency(room.pricePerNight)}</td>
+                    <td className="p-4">
+                      <RoomPrice room={room} saving={updatingId === room.id} onSave={setPrice} />
+                    </td>
                     <td className="p-4">
                       <RoomAvailability room={room} saving={updatingId === room.id} onSave={setStatus} />
                     </td>

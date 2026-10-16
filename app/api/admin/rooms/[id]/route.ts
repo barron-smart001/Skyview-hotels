@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { revalidateTag } from 'next/cache';
 import { requireAdmin } from '@/lib/auth';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { isSupabaseAdminConfigured } from '@/lib/env';
 import { ROOMS_CACHE_TAG } from '@/lib/rooms';
 
 const ROOM_STATUSES = ['available', 'occupied', 'cleaning', 'maintenance'] as const;
@@ -12,20 +14,38 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
   const { id } = await params;
   const body = await request.json().catch(() => null);
-  const status = body?.status;
-  const rawNote = typeof body?.note === 'string' ? body.note.trim().slice(0, 200) : '';
-  // The reason only applies while a room is out of service.
-  const statusNote = status === 'available' || !rawNote ? null : rawNote;
+  const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
 
-  if (!ROOM_STATUSES.includes(status)) {
-    return NextResponse.json({ error: 'Invalid room status.' }, { status: 400 });
+  if (body?.status !== undefined) {
+    const status = body.status;
+    if (!ROOM_STATUSES.includes(status)) {
+      return NextResponse.json({ error: 'Invalid room status.' }, { status: 400 });
+    }
+    const rawNote = typeof body.note === 'string' ? body.note.trim().slice(0, 200) : '';
+    updates.status = status;
+    // The reason only applies while a room is out of service.
+    updates.status_note = status === 'available' || !rawNote ? null : rawNote;
   }
 
-  const { data, error } = await admin.supabase
+  if (body?.pricePerNight !== undefined) {
+    const price = Number(body.pricePerNight);
+    if (!Number.isFinite(price) || price <= 0 || price > 100_000_000) {
+      return NextResponse.json({ error: 'Enter a valid price greater than zero.' }, { status: 400 });
+    }
+    updates.price_per_night_ngn = Math.round(price);
+  }
+
+  if (Object.keys(updates).length === 1) {
+    return NextResponse.json({ error: 'Nothing to update.' }, { status: 400 });
+  }
+
+  // The caller is already verified as an administrator, so write with the server client.
+  const db = isSupabaseAdminConfigured() ? createAdminClient() : admin.supabase;
+  const { data, error } = await db
     .from('rooms')
-    .update({ status, status_note: statusNote, updated_at: new Date().toISOString() })
+    .update(updates)
     .eq('id', id)
-    .select('id, status, status_note, updated_at')
+    .select('id, status, status_note, price_per_night_ngn, updated_at')
     .maybeSingle();
 
   if (error) {
