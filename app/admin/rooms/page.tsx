@@ -4,14 +4,62 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { useAdminRooms } from '@/components/admin/useAdminRooms';
 import { formatCurrency } from '@/lib/utils';
-import { Plus, Search, CheckCircle2, AlertCircle, Edit, Trash2 } from 'lucide-react';
+import { Plus, Search, Edit, Trash2 } from 'lucide-react';
+import type { AdminRoom } from '@/types';
 
 const STATUS_LABELS = {
   available: 'Available',
   occupied: 'Occupied',
   cleaning: 'Cleaning',
-  maintenance: 'Blocked',
+  maintenance: 'Unavailable (blocked)',
 } as const;
+
+const STATUS_STYLES: Record<AdminRoom['status'], string> = {
+  available: 'text-emerald-400 border-emerald-500/30',
+  occupied: 'text-indigo-400 border-indigo-500/30',
+  cleaning: 'text-amber-400 border-amber-500/30',
+  maintenance: 'text-rose-400 border-rose-500/30',
+};
+
+/** Lets staff change a room's availability and say why it is out of service. */
+function RoomAvailability({ room, saving, onSave }: { room: AdminRoom; saving: boolean; onSave: (id: string, status: AdminRoom['status'], note?: string) => Promise<void> }) {
+  const [status, setStatus] = useState(room.status);
+  const [note, setNote] = useState(room.statusNote ?? '');
+  const changed = status !== room.status || (status !== 'available' && note.trim() !== (room.statusNote ?? ''));
+
+  return (
+    <div className="space-y-2 min-w-52">
+      <select
+        value={status}
+        onChange={(e) => setStatus(e.target.value as AdminRoom['status'])}
+        aria-label={`Availability for ${room.name}`}
+        className={`w-full rounded-lg border bg-stone-900 px-2 py-1.5 text-[11px] font-bold focus:outline-none ${STATUS_STYLES[status]}`}
+      >
+        {(Object.keys(STATUS_LABELS) as AdminRoom['status'][]).map((value) => (
+          <option key={value} value={value}>{STATUS_LABELS[value]}</option>
+        ))}
+      </select>
+      {status !== 'available' && (
+        <input
+          value={note}
+          maxLength={200}
+          onChange={(e) => setNote(e.target.value)}
+          placeholder="Reason (e.g. AC repair)"
+          className="w-full rounded-lg border border-stone-800 bg-stone-900 px-2 py-1.5 text-[11px] text-white focus:border-amber-500 focus:outline-none"
+        />
+      )}
+      {changed && (
+        <button
+          disabled={saving}
+          onClick={() => void onSave(room.id, status, note)}
+          className="rounded-lg bg-amber-500 px-3 py-1 text-[11px] font-bold text-stone-950 disabled:opacity-50"
+        >
+          {saving ? 'Saving…' : 'Save'}
+        </button>
+      )}
+    </div>
+  );
+}
 
 export default function AdminRoomsPage() {
   const { rooms, loading, error, updatingId, setStatus } = useAdminRooms();
@@ -80,7 +128,6 @@ export default function AdminRoomsPage() {
                 <tr><td colSpan={6} className="p-8 text-center text-stone-500">No rooms found.</td></tr>
               )}
               {filtered.map((room) => {
-                const blocked = room.status === 'maintenance';
                 return (
                   <tr key={room.id} className="hover:bg-stone-900/40 transition">
                     <td className="p-4 flex items-center gap-3">
@@ -104,19 +151,7 @@ export default function AdminRoomsPage() {
                     </td>
                     <td className="p-4 font-bold text-amber-300">{formatCurrency(room.pricePerNight)}</td>
                     <td className="p-4">
-                      <button
-                        disabled={updatingId === room.id}
-                        onClick={() => setStatus(room.id, blocked ? 'available' : 'maintenance')}
-                        title={blocked ? 'Unblock room' : 'Block room for maintenance'}
-                        className={`px-3 py-1 rounded-full text-[10px] font-bold transition flex items-center gap-1.5 disabled:opacity-50 ${
-                          blocked
-                            ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                            : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                        }`}
-                      >
-                        {blocked ? <AlertCircle className="w-3 h-3" /> : <CheckCircle2 className="w-3 h-3" />}
-                        {STATUS_LABELS[room.status]}
-                      </button>
+                      <RoomAvailability room={room} saving={updatingId === room.id} onSave={setStatus} />
                     </td>
                     <td className="p-4 text-right space-x-2">
                       <button disabled title="Editing rooms is managed in Supabase for now" className="p-1.5 bg-stone-900 text-stone-300 rounded-lg opacity-40 cursor-not-allowed">

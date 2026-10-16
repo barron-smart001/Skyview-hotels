@@ -12,7 +12,7 @@ export async function GET() {
 
   const { data, error } = await admin.supabase
     .from('rooms')
-    .select('id, room_number, floor, capacity, price_per_night_ngn, status, images, updated_at, hotel:hotels!inner(slug), room_type:room_types(name, bed_type, size_sqft)')
+    .select('id, room_number, floor, capacity, price_per_night_ngn, status, status_note, images, updated_at, hotel:hotels!inner(slug), room_type:room_types(name, bed_type, size_sqft)')
     .eq('hotel.slug', HOTEL.slug)
     .order('room_number', { ascending: true });
 
@@ -33,6 +33,7 @@ export async function GET() {
       capacity: row.capacity,
       pricePerNight: Number(row.price_per_night_ngn),
       status: row.status,
+      statusNote: row.status_note ?? null,
       image: row.images?.[0] ?? null,
       updatedAt: row.updated_at,
     };

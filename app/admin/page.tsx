@@ -25,8 +25,8 @@ async function loadDashboard() {
   const monthStart = `${today.slice(0, 7)}-01`;
 
   // Independent queries run in parallel; counts use head requests so no rows are transferred.
-  const [rooms, inHouse, upcoming, arrivals, revenue, recent, requests] = await Promise.all([
-    supabase.from('rooms').select('status, hotel:hotels!inner(slug)').eq('hotel.slug', HOTEL.slug),
+  const [rooms, inHouse, upcoming, arrivals, revenue, recent, requests, departures, newMessages, stays] = await Promise.all([
+    supabase.from('rooms').select('id, room_number, floor, status, status_note, hotel:hotels!inner(slug)').eq('hotel.slug', HOTEL.slug).order('room_number', { ascending: true }),
     supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('status', 'checked-in'),
     supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('status', 'confirmed').gte('check_out', today),
     supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('status', 'confirmed').eq('check_in', today),
@@ -38,11 +38,23 @@ async function loadDashboard() {
       .in('status', ['Pending', 'Accepted', 'In Progress'])
       .order('created_at', { ascending: false })
       .limit(6),
+    supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('status', 'checked-in').eq('check_out', today),
+    supabase.from('contact_messages').select('id', { count: 'exact', head: true }).eq('status', 'new'),
+    supabase.from('bookings').select('room_id, guest_name, check_out').eq('status', 'checked-in'),
   ]);
 
   const roomRows = rooms.data ?? [];
   const totalRooms = roomRows.length;
   const checkedIn = inHouse.count ?? 0;
+  const guestByRoom = new Map((stays.data ?? []).map((stay) => [stay.room_id as string, stay as { guest_name: string; check_out: string }]));
+  const roomBoard = roomRows.map((room) => ({
+    id: room.id as string,
+    number: room.room_number as string,
+    floor: room.floor as number,
+    status: room.status as string,
+    note: (room.status_note as string | null) ?? null,
+    guest: guestByRoom.get(room.id as string) ?? null,
+  }));
 
   return {
     totalRooms,
@@ -51,6 +63,10 @@ async function loadDashboard() {
     checkedIn,
     activeBookings: (upcoming.count ?? 0) + checkedIn,
     arrivalsToday: arrivals.count ?? 0,
+    departuresToday: departures.count ?? 0,
+    newMessages: newMessages.count ?? 0,
+    unavailableRooms: roomRows.filter((room) => room.status === 'maintenance').length,
+    roomBoard,
     monthRevenue: (revenue.data ?? []).reduce((sum, payment) => sum + Number(payment.amount_ngn), 0),
     recentBookings: ((recent.data ?? []) as unknown as BookingRow[]).map(mapBookingRow),
     serviceRequests: (requests.data ?? []) as unknown as ServiceRequestRow[],
@@ -64,6 +80,13 @@ const STATUS_STYLES: Record<string, string> = {
   'checked-in': 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
   completed: 'bg-stone-800 text-stone-400 border-stone-700',
   cancelled: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+};
+
+const ROOM_TILE_STYLES: Record<string, string> = {
+  Available: 'border-emerald-500/30 bg-emerald-500/5 text-emerald-400',
+  Occupied: 'border-indigo-500/30 bg-indigo-500/5 text-indigo-400',
+  Cleaning: 'border-amber-500/30 bg-amber-500/5 text-amber-400',
+  Unavailable: 'border-rose-500/30 bg-rose-500/5 text-rose-400',
 };
 
 export default async function AdminDashboardPage() {
@@ -134,6 +157,47 @@ export default async function AdminDashboardPage() {
           <div className="w-11 h-11 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
             <TrendingUp className="w-5 h-5" />
           </div>
+        </div>
+      </div>
+
+      {/* At-a-glance counters */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        {[
+          { label: 'Check-outs today', value: stats.departuresToday, href: '/admin/bookings' },
+          { label: 'Unavailable rooms', value: stats.unavailableRooms, href: '/admin/rooms' },
+          { label: 'New messages', value: stats.newMessages, href: '/admin/messages' },
+          { label: 'Open service requests', value: stats.serviceRequests.length, href: '/admin/housekeeping' },
+        ].map((item) => (
+          <Link key={item.label} href={item.href} className="bg-stone-950 p-4 rounded-2xl border border-stone-800 hover:border-amber-500/50 transition">
+            <span className="text-[11px] text-stone-400">{item.label}</span>
+            <div className="text-xl font-extrabold text-white mt-1">{item.value}</div>
+          </Link>
+        ))}
+      </div>
+
+      {/* Live room board */}
+      <div className="bg-stone-950 rounded-2xl border border-stone-800 p-6 mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-bold text-white">Room Status Board</h3>
+          <Link href="/admin/rooms" className="text-xs text-amber-300 hover:text-amber-200">Change availability</Link>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+          {stats.roomBoard.map((room) => {
+            const unavailable = room.status === 'maintenance';
+            const label = unavailable ? 'Unavailable' : room.guest ? 'Occupied' : room.status === 'cleaning' ? 'Cleaning' : room.status === 'occupied' ? 'Occupied' : 'Available';
+            return (
+              <div key={room.id} className={`rounded-xl border p-3 ${ROOM_TILE_STYLES[label]}`}>
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-sm font-bold text-white">{room.number}</span>
+                  <span className="text-[10px] font-bold">{label}</span>
+                </div>
+                <p className="mt-1 truncate text-[11px] text-stone-300">
+                  {room.guest ? `${room.guest.guest_name} · out ${room.guest.check_out}` : unavailable && room.note ? room.note : `Floor ${room.floor}`}
+                </p>
+              </div>
+            );
+          })}
+          {stats.roomBoard.length === 0 && <p className="col-span-full py-4 text-center text-xs text-stone-500">No rooms found.</p>}
         </div>
       </div>
 

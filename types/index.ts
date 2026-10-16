@@ -65,6 +65,7 @@ export interface AdminRoom {
   capacity: number;
   pricePerNight: number;
   status: 'available' | 'occupied' | 'cleaning' | 'maintenance';
+  statusNote: string | null;
   image: string | null;
   updatedAt: string | null;
 }

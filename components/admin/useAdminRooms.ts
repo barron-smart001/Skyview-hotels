@@ -28,18 +28,18 @@ export function useAdminRooms() {
     return () => controller.abort();
   }, []);
 
-  const setStatus = async (id: string, status: AdminRoom['status']) => {
+  const setStatus = async (id: string, status: AdminRoom['status'], note = '') => {
     setUpdatingId(id);
     setError('');
     try {
       const response = await fetch(`/api/admin/rooms/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ status, note }),
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Could not update the room.');
-      setRooms((prev) => prev.map((room) => (room.id === id ? { ...room, status, updatedAt: result.room.updated_at } : room)));
+      setRooms((prev) => prev.map((room) => (room.id === id ? { ...room, status, statusNote: result.room.status_note ?? null, updatedAt: result.room.updated_at } : room)));
     } catch (updateError) {
       setError(updateError instanceof Error ? updateError.message : 'Could not update the room.');
     } finally {

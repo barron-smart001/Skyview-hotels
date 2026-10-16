@@ -27,27 +27,19 @@ export default function SignUpPage() {
     try {
       const nameParts = fullName.trim().split(/\s+/);
       const firstName = nameParts.shift() ?? '';
-      const supabase = createClient();
-      const { data, error } = await supabase.auth.signUp({
-        email: email.trim(),
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
-          data: {
-            first_name: firstName,
-            last_name: nameParts.join(' '),
-            phone: phone.trim(),
-          },
-        },
+      const response = await fetch('/api/auth/sign-up', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), password, firstName, lastName: nameParts.join(' '), phone: phone.trim() }),
       });
-      if (error) throw error;
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || 'Unable to create your guest account.');
 
-      if (data.session) {
-        router.push('/');
-        router.refresh();
-      } else {
-        setConfirmationMessage('Account created. Check your email for a confirmation link before signing in.');
-      }
+      // No confirmation email: sign straight in with the new account.
+      const { error } = await createClient().auth.signInWithPassword({ email: email.trim().toLowerCase(), password });
+      if (error) throw error;
+      router.push('/');
+      router.refresh();
     } catch (error: unknown) {
       setSaveError(error instanceof Error ? error.message : 'Unable to create your guest account.');
     } finally {

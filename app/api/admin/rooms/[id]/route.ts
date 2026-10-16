@@ -13,6 +13,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   const { id } = await params;
   const body = await request.json().catch(() => null);
   const status = body?.status;
+  const rawNote = typeof body?.note === 'string' ? body.note.trim().slice(0, 200) : '';
+  // The reason only applies while a room is out of service.
+  const statusNote = status === 'available' || !rawNote ? null : rawNote;
 
   if (!ROOM_STATUSES.includes(status)) {
     return NextResponse.json({ error: 'Invalid room status.' }, { status: 400 });
@@ -20,9 +23,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
   const { data, error } = await admin.supabase
     .from('rooms')
-    .update({ status, updated_at: new Date().toISOString() })
+    .update({ status, status_note: statusNote, updated_at: new Date().toISOString() })
     .eq('id', id)
-    .select('id, status, updated_at')
+    .select('id, status, status_note, updated_at')
     .maybeSingle();
 
   if (error) {
