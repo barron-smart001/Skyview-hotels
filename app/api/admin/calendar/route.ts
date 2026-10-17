@@ -18,10 +18,12 @@ type StayRow = {
   total_amount_ngn: number | string;
   source: string | null;
   created_at: string;
+  checked_in_at: string | null;
+  checked_out_at: string | null;
   room: { room_number: string } | { room_number: string }[] | null;
 };
 
-const STAY_SELECT = 'id, booking_reference, guest_name, guest_phone, check_in, check_out, status, payment_status, total_amount_ngn, source, created_at, room:rooms(room_number)';
+const STAY_SELECT = 'id, booking_reference, guest_name, guest_phone, check_in, check_out, status, payment_status, total_amount_ngn, source, created_at, checked_in_at, checked_out_at, room:rooms(room_number)';
 
 function addDays(date: string, days: number) {
   return new Date(new Date(`${date}T00:00:00Z`).valueOf() + days * DAY_MS).toISOString().slice(0, 10);
@@ -46,6 +48,9 @@ function mapStay(row: StayRow) {
     paymentStatus: row.payment_status,
     amount: Number(row.total_amount_ngn),
     source: row.source ?? 'online',
+    createdAt: row.created_at,
+    checkedInAt: row.checked_in_at,
+    checkedOutAt: row.checked_out_at,
   };
 }
 
@@ -131,19 +136,21 @@ export async function GET(request: Request) {
       departures: (departures.data as unknown as StayRow[]).map(mapStay),
       inHouse: (inHouse.data as unknown as StayRow[]).map(mapStay),
       created: (created.data as unknown as StayRow[]).map(mapStay),
-      payments: ((payments.data ?? []) as unknown as { id: string; amount_ngn: number | string; channel: string | null; booking: { booking_reference: string; guest_name: string } | { booking_reference: string; guest_name: string }[] | null }[]).map((payment) => ({
+      payments: ((payments.data ?? []) as unknown as { id: string; amount_ngn: number | string; paid_at: string | null; channel: string | null; booking: { booking_reference: string; guest_name: string } | { booking_reference: string; guest_name: string }[] | null }[]).map((payment) => ({
         id: payment.id,
+        paidAt: payment.paid_at,
         amount: Number(payment.amount_ngn),
         channel: payment.channel,
         reference: one(payment.booking)?.booking_reference ?? '',
         guest: one(payment.booking)?.guest_name ?? '',
       })),
-      messages: (messages.data ?? []).map((message) => ({ id: message.id, kind: message.kind, name: message.name, status: message.status })),
-      serviceRequests: ((requests.data ?? []) as unknown as { id: string; status: string; requested_time: string; service: { name: string } | { name: string }[] | null }[]).map((request) => ({
+      messages: (messages.data ?? []).map((message) => ({ id: message.id, kind: message.kind, name: message.name, status: message.status, createdAt: message.created_at })),
+      serviceRequests: ((requests.data ?? []) as unknown as { id: string; status: string; requested_time: string; created_at: string; service: { name: string } | { name: string }[] | null }[]).map((request) => ({
         id: request.id,
         status: request.status,
         service: one(request.service)?.name ?? 'Service',
         time: request.requested_time,
+        createdAt: request.created_at,
       })),
     });
   }

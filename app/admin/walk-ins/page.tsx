@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useAdminRooms } from '@/components/admin/useAdminRooms';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, formatDateTime } from '@/lib/utils';
 import type { Booking } from '@/types';
 import { LogIn, LogOut, XCircle } from 'lucide-react';
 
@@ -202,6 +202,7 @@ export default function WalkInRecordsPage() {
                     <span className="block font-mono font-bold text-amber-300">{record.bookingReference}</span>
                     <span className="font-medium text-white">{record.guestName}</span>
                     <span className="block text-[11px] text-stone-500">{record.guestPhone} · {record.source}</span>
+                    <span className="block text-[11px] text-stone-500">Recorded {formatDateTime(record.createdAt)}</span>
                   </td>
                   <td className="p-4 text-stone-300">{record.room.name}</td>
                   <td className="p-4 text-stone-400">{record.checkIn}<span className="block text-[11px] text-stone-500">to {record.checkOut}</span></td>

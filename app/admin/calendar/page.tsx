@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, formatTime } from '@/lib/utils';
 
 type DayCounts = { arrivals: number; departures: number; inHouse: number };
 type Stay = {
@@ -17,6 +17,9 @@ type Stay = {
   paymentStatus: string;
   amount: number;
   source: string;
+  createdAt: string;
+  checkedInAt: string | null;
+  checkedOutAt: string | null;
 };
 type DayDetail = {
   date: string;
@@ -24,9 +27,9 @@ type DayDetail = {
   departures: Stay[];
   inHouse: Stay[];
   created: Stay[];
-  payments: { id: string; amount: number; channel: string | null; reference: string; guest: string }[];
-  messages: { id: string; kind: string; name: string; status: string }[];
-  serviceRequests: { id: string; status: string; service: string; time: string }[];
+  payments: { id: string; paidAt: string | null; amount: number; channel: string | null; reference: string; guest: string }[];
+  messages: { id: string; kind: string; name: string; status: string; createdAt: string }[];
+  serviceRequests: { id: string; status: string; service: string; time: string; createdAt: string }[];
 };
 
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -68,6 +71,11 @@ function StayList({ title, stays, empty }: { title: string; stays: Stay[]; empty
                 </span>
               </div>
               <div className="mt-1 text-[11px] text-stone-500">{stay.checkIn} → {stay.checkOut} · {stay.phone}</div>
+              <div className="mt-1 flex flex-wrap gap-x-3 text-[11px] text-stone-400">
+                <span>Booked {formatTime(stay.createdAt)}</span>
+                {stay.checkedInAt && <span className="text-emerald-400">Checked in {formatTime(stay.checkedInAt)}</span>}
+                {stay.checkedOutAt && <span className="text-indigo-400">Checked out {formatTime(stay.checkedOutAt)}</span>}
+              </div>
             </li>
           ))}
         </ul>
@@ -205,7 +213,7 @@ export default function AdminCalendarPage() {
                   <ul className="space-y-1 text-xs text-stone-300">
                     {loadedDetail.payments.map((payment) => (
                       <li key={payment.id} className="flex justify-between gap-2">
-                        <span>{payment.guest} <span className="font-mono text-stone-500">{payment.reference}</span></span>
+                        <span><span className="text-stone-500">{formatTime(payment.paidAt)}</span> {payment.guest} <span className="font-mono text-stone-500">{payment.reference}</span></span>
                         <span className="font-bold text-emerald-400">{formatCurrency(payment.amount)}</span>
                       </li>
                     ))}
@@ -223,10 +231,10 @@ export default function AdminCalendarPage() {
                 ) : (
                   <ul className="space-y-1 text-xs text-stone-300">
                     {loadedDetail.messages.map((message) => (
-                      <li key={message.id}>✉ {message.name} · <span className="capitalize">{message.kind}</span> · {message.status}</li>
+                      <li key={message.id}>✉ <span className="text-stone-500">{formatTime(message.createdAt)}</span> {message.name} · <span className="capitalize">{message.kind}</span> · {message.status}</li>
                     ))}
                     {loadedDetail.serviceRequests.map((request) => (
-                      <li key={request.id}>🛎 {request.service} · {request.status} · {request.time}</li>
+                      <li key={request.id}>🛎 <span className="text-stone-500">{formatTime(request.createdAt)}</span> {request.service} · {request.status} · {request.time}</li>
                     ))}
                   </ul>
                 )}

@@ -47,7 +47,12 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   // Matching on the current status prevents two receptionists overwriting each other.
   const { data: updated, error: updateError } = await admin.supabase
     .from('bookings')
-    .update({ status: nextStatus, updated_at: new Date().toISOString() })
+    .update({
+      status: nextStatus,
+      updated_at: new Date().toISOString(),
+      ...(nextStatus === 'checked-in' ? { checked_in_at: new Date().toISOString() } : {}),
+      ...(nextStatus === 'completed' ? { checked_out_at: new Date().toISOString() } : {}),
+    })
     .eq('id', id)
     .eq('status', current)
     .select('id, status')

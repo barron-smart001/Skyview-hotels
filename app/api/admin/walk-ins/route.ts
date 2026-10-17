@@ -148,6 +148,7 @@ export async function POST(request: Request) {
       guests_count: guestsCount,
       total_amount_ngn: total,
       status: stayStatus,
+      checked_in_at: stayStatus === 'checked-in' ? new Date().toISOString() : null,
       payment_status: paid ? 'paid' : 'pending',
       payment_method: paid ? paymentMethod : null,
       special_requests: notes,

@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { Booking } from '@/types';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, formatDateTime } from '@/lib/utils';
 import { CheckCircle2, LogIn, LogOut, XCircle } from 'lucide-react';
 
 type BookingsResponse = { bookings: Booking[]; total: number; page: number; pageSize: number; error?: string };
@@ -146,6 +146,7 @@ export default function AdminBookingsPage() {
                     <span className="font-mono text-amber-300 font-bold block">{b.bookingReference}</span>
                     <span className="text-white font-medium">{b.guestName}</span>
                     <span className="text-[11px] text-stone-500 block">{b.guestPhone}</span>
+                    <span className="text-[11px] text-stone-500 block">Booked {formatDateTime(b.createdAt)}</span>
                   </td>
                   <td className="p-4 text-stone-300 font-medium">{b.room.name}</td>
                   <td className="p-4 text-stone-400">
