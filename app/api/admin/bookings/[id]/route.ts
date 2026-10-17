@@ -31,6 +31,19 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     return NextResponse.json({ error: `A ${current} booking cannot be marked ${nextStatus}.` }, { status: 409 });
   }
 
+  if (nextStatus === 'checked-in' && booking.room_id) {
+    const { data: other } = await admin.supabase
+      .from('bookings')
+      .select('guest_name')
+      .eq('room_id', booking.room_id)
+      .eq('status', 'checked-in')
+      .neq('id', id)
+      .limit(1);
+    if (other?.length) {
+      return NextResponse.json({ error: `This room is still occupied by ${other[0].guest_name}. Check them out first.` }, { status: 409 });
+    }
+  }
+
   // Matching on the current status prevents two receptionists overwriting each other.
   const { data: updated, error: updateError } = await admin.supabase
     .from('bookings')

@@ -99,13 +99,28 @@ export async function POST(request: Request) {
   const db = createAdminClient();
   const { data: room, error: roomError } = await db
     .from('rooms')
-    .select('id, hotel_id, capacity, price_per_night_ngn')
+    .select('id, room_number, hotel_id, capacity, price_per_night_ngn, status')
     .eq('id', roomId)
     .maybeSingle();
   if (roomError) return NextResponse.json({ error: 'Could not look up the room.' }, { status: 503 });
   if (!room) return NextResponse.json({ error: 'Room not found.' }, { status: 404 });
   if (guestsCount > room.capacity) {
     return NextResponse.json({ error: `This room accommodates up to ${room.capacity} guests.` }, { status: 400 });
+  }
+
+  // A room that still has a guest in it cannot be given to anyone else until they check out.
+  const { data: inHouse, error: inHouseError } = await db
+    .from('bookings')
+    .select('guest_name')
+    .eq('room_id', room.id)
+    .eq('status', 'checked-in')
+    .limit(1);
+  if (inHouseError) return NextResponse.json({ error: 'Could not check the room is free.' }, { status: 503 });
+  if (inHouse?.length) {
+    return NextResponse.json({ error: `Room ${room.room_number} is occupied by ${inHouse[0].guest_name}. Check them out before booking someone else.` }, { status: 409 });
+  }
+  if (room.status === 'occupied') {
+    return NextResponse.json({ error: `Room ${room.room_number} is marked occupied. Check the current guest out, or set the room to Available first.` }, { status: 409 });
   }
 
   // Receptionists may agree a different rate, so an explicit amount overrides the room price.

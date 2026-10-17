@@ -130,8 +130,8 @@ export default function WalkInRecordsPage() {
           <select required value={roomId} onChange={(e) => setRoomId(e.target.value)} className={INPUT}>
             <option value="">Select a room…</option>
             {rooms.map((room) => (
-              <option key={room.id} value={room.id}>
-                {room.roomNumber} · {room.name} · {formatCurrency(room.pricePerNight)}{room.status === 'maintenance' ? ' (unavailable)' : ''}
+              <option key={room.id} value={room.id} disabled={room.status === 'occupied'}>
+                {room.roomNumber} · {room.name} · {formatCurrency(room.pricePerNight)}{room.status === 'maintenance' ? ' (unavailable)' : room.status === 'occupied' ? ' (occupied, check out first)' : ''}
               </option>
             ))}
           </select>
