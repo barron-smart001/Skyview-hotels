@@ -9,6 +9,7 @@ import {
   CalendarCheck2,
   Brush,
   ClipboardList,
+  CalendarDays,
   Users,
   CreditCard,
   ConciergeBell,
@@ -27,6 +28,7 @@ import type { AdminIdentity } from '@/types';
 const ADMIN_NAV = [
   { label: 'Overview', href: '/admin', icon: LayoutDashboard },
   { label: 'Bookings', href: '/admin/bookings', icon: CalendarCheck2 },
+  { label: 'Calendar', href: '/admin/calendar', icon: CalendarDays },
   { label: 'Walk-in Records', href: '/admin/walk-ins', icon: ClipboardList },
   { label: 'Guests', href: '/admin/guests', icon: Users },
   { label: 'Rooms', href: '/admin/rooms', icon: BedDouble },
