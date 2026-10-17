@@ -78,7 +78,7 @@ export default function WalkInRecordsPage() {
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Could not save the record.');
-      setNotice(`Saved. Reference ${result.booking.booking_reference}`);
+      setNotice(`Saved. Reference ${result.booking.booking_reference}${result.roomStatus === 'occupied' ? ' · room marked occupied' : ''}`);
       setGuestName('');
       setGuestPhone('');
       setGuestEmail('');
@@ -173,7 +173,7 @@ export default function WalkInRecordsPage() {
         )}
         <div className="sm:col-span-2"><label className={LABEL}>Notes</label><input value={notes} onChange={(e) => setNotes(e.target.value)} maxLength={1000} placeholder="ID checked, special requests…" className={INPUT} /></div>
         <label className="flex items-center gap-2 text-xs text-stone-300 sm:col-span-2 lg:col-span-3">
-          <input type="checkbox" checked={checkInNow} onChange={(e) => setCheckInNow(e.target.checked)} /> Guest is checking in now
+          <input type="checkbox" checked={checkInNow} onChange={(e) => setCheckInNow(e.target.checked)} /> Guest is checking in now (also happens automatically when the stay starts today)
         </label>
         <button disabled={saving} className="rounded-xl bg-amber-500 px-4 py-2.5 text-xs font-bold text-stone-950 disabled:opacity-50">
           {saving ? 'Saving…' : 'Save record'}

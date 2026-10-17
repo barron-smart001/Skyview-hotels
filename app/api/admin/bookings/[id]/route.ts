@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { requireAdmin } from '@/lib/auth';
 import { BOOKING_TRANSITIONS } from '@/lib/bookings';
+import { syncRoomWithBooking } from '@/lib/room-status';
 import type { Booking } from '@/types';
 
 /** Reception status changes: confirm, check in, check out, cancel. */
@@ -18,7 +19,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
   const { data: booking, error } = await admin.supabase
     .from('bookings')
-    .select('id, status')
+    .select('id, status, room_id')
     .eq('id', id)
     .maybeSingle();
 
@@ -47,6 +48,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     return NextResponse.json({ error: 'Could not update the booking.' }, { status: 500 });
   }
   if (!updated) return NextResponse.json({ error: 'This booking was changed by someone else. Refresh and try again.' }, { status: 409 });
+
+  if (booking.room_id) await syncRoomWithBooking(booking.room_id, nextStatus, current);
 
   return NextResponse.json({ booking: updated });
 }

@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { isSupabaseAdminConfigured } from '@/lib/env';
 import { BOOKING_SELECT, mapBookingRow, type BookingRow } from '@/lib/bookings';
 import { generateBookingReference } from '@/lib/validations/booking';
+import { syncRoomWithBooking } from '@/lib/room-status';
 
 const SOURCES = ['walk-in', 'phone'] as const;
 const METHODS = ['cash', 'transfer', 'pos', 'card'] as const;
@@ -69,6 +70,8 @@ export async function POST(request: Request) {
   const paymentMethod = METHODS.find((value) => value === body.paymentMethod) ?? null;
   const paid = body.paymentStatus === 'paid';
   const checkInNow = body.checkInNow === true;
+  // Hotel-local date, so a stay that has already started is recorded as in-house.
+  const todayLocal = new Date().toLocaleDateString('en-CA', { timeZone: 'Africa/Lagos' });
   const guestsCount = Number(body.guestsCount);
 
   if (!roomId || !guestName || !guestPhone) {
@@ -112,6 +115,9 @@ export async function POST(request: Request) {
   }
   const total = customTotal ?? Number(room.price_per_night_ngn) * nights;
 
+  // Started and not yet ended => guest is in the room; fully past => already completed.
+  const stayStatus = checkOut <= todayLocal ? 'completed' : checkInNow || checkIn <= todayLocal ? 'checked-in' : 'confirmed';
+
   const { data: booking, error } = await db
     .from('bookings')
     .insert({
@@ -126,7 +132,7 @@ export async function POST(request: Request) {
       check_out: checkOut,
       guests_count: guestsCount,
       total_amount_ngn: total,
-      status: checkInNow ? 'checked-in' : 'confirmed',
+      status: stayStatus,
       payment_status: paid ? 'paid' : 'pending',
       payment_method: paid ? paymentMethod : null,
       special_requests: notes,
@@ -144,5 +150,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Could not save the record. Make sure migration 009 has been run.' }, { status: 500 });
   }
 
-  return NextResponse.json({ booking }, { status: 201 });
+  // Recording a guest who is already in the room marks it occupied; the admin can still override it.
+  if (stayStatus === 'checked-in') await syncRoomWithBooking(room.id, 'checked-in');
+
+  return NextResponse.json({ booking, roomStatus: stayStatus === 'checked-in' ? 'occupied' : null }, { status: 201 });
 }
